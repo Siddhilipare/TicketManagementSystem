@@ -1,0 +1,56 @@
+SP for Master Detail transaction thir flow and use
+
+You can explain it to your ma'am like this:
+
+### **1. `sp_ShowTicketList`**
+
+* Used to display the **Ticket List page**.
+* It fetches the booking summary such as customer name, movie, cinema hall, screen, total tickets, show time, and total amount.
+
+---
+
+### **2. `sp_GetTicketByID`**
+
+* Called when the user clicks **Edit** on a ticket.
+* It retrieves the complete ticket information, including the **master details** (customer, movie, show details) and the **booked seat details**.
+
+---
+
+### **3. `sp_GetTicketDropdownData`**
+
+* Used for the **dependent dropdowns** in the Add/Edit Ticket form.
+* It loads Cinema Halls, Screens, Movies, Show Dates, and Show Times based on the user's previous selection.
+
+---
+
+### **4. `sp_UpdateTicket`**
+
+* Used to save changes made to the **master information** of a ticket.
+* It updates the customer name and changes the booking to the selected show (movie, hall, screen, date, and time).
+
+---
+
+### **5. `sp_GetSeatMapForEdit`**
+
+* Used when opening the **seat selection** during ticket editing.
+* It returns all seats of the selected screen and indicates which seats are **available**, **already booked**, and **currently selected** for that ticket.
+
+---
+
+### **6. `sp_SaveTicketSeats`**
+
+* Used after the user saves the updated seat selection.
+* It inserts new seats, removes deselected seats, prevents double booking, and recalculates the total ticket count and payment amount.
+
+---
+
+## **Overall Flow (30-second explanation)**
+
+1. **`sp_ShowTicketList`** → Displays all booked tickets.
+2. **`sp_GetTicketByID`** → Loads the selected ticket for editing.
+3. **`sp_GetTicketDropdownData`** → Fills the cascading dropdowns (Hall → Screen → Movie → Date → Time).
+4. **`sp_GetSeatMapForEdit`** → Displays the seat layout with booked and available seats.
+5. **`sp_UpdateTicket`** → Saves changes to the ticket's master information.
+6. **`sp_SaveTicketSeats`** → Saves the updated seat selection and recalculates the ticket count and payment.
+
+This gives a clear, interview-style explanation of how the stored procedures work together in the application.

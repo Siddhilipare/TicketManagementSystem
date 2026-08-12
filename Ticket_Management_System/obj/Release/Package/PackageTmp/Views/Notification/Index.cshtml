@@ -1,0 +1,142 @@
+@model IEnumerable<TicketDAL.Dal.NotificationItem>
+@using System.Linq
+@{
+    ViewBag.Title = "Notification History";
+    ViewBag.ActiveTab = "Notifications";
+    int unreadCount = Model != null ? Model.Count(n => !n.IsRead) : 0;
+    var claimsPrincipal = User as System.Security.Claims.ClaimsPrincipal;
+    var roleClaim = claimsPrincipal != null ? claimsPrincipal.FindFirst(System.Security.Claims.ClaimTypes.Role) : null;
+    string userRole = roleClaim != null ? roleClaim.Value : "";
+}
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <div class="accent-text">Activity Center</div>
+        <h2 class="luxury-heading" style="font-size: 28px; margin-top: 4px; margin-bottom: 0;">Notification History</h2>
+    </div>
+    @if (unreadCount > 0)
+    {
+        <button type="button" onclick="markAllNotificationsReadPage()" class="btn-secondary-gold" style="display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-check-double"></i> Mark All as Read
+        </button>
+    }
+</div>
+
+<div class="luxury-card" style="padding: 0; overflow: hidden; border-radius: 12px;">
+    @if (Model != null && Model.Any())
+    {
+        <div id="notificationListContainer">
+            @foreach (var n in Model)
+            {
+                string safeMsg = (n.Message ?? "").Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " ");
+                <div class="notif-history-item @(n.IsRead ? "read" : "unread")"
+                     data-notif-id="@n.Id"
+                     onclick="handleNotificationClick(@n.Id, @(n.TicketId.HasValue ? n.TicketId.Value.ToString() : "null"));"
+                     style="padding: 18px 24px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; transition: all 200ms ease; display: flex; align-items: flex-start; gap: 14px;">
+                    
+                    <div style="margin-top: 2px;">
+                        @if (!n.IsRead)
+                        {
+                            <span class="unread-dot" style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent-primary); display: inline-block; box-shadow: 0 0 6px var(--accent-primary);"></span>
+                        }
+                        else
+                        {
+                            <i class="fa-regular fa-bell" style="color: var(--text-tertiary); font-size: 14px;"></i>
+                        }
+                    </div>
+
+                    <div style="flex-grow: 1;">
+                        <div class="notif-message-text" style="font-size: 14px; line-height: 1.5; color: @(n.IsRead ? "var(--text-secondary)" : "var(--text-primary)"); font-weight: @(n.IsRead ? "400" : "700");">
+                            @n.Message
+                        </div>
+                        <div class="notif-time-text" style="font-size: 12px; margin-top: 6px; color: @(n.IsRead ? "var(--text-tertiary)" : "var(--accent-primary)"); font-weight: @(n.IsRead ? "400" : "600");">
+                            <i class="fa-regular fa-clock" style="margin-right: 4px;"></i> @n.CreatedOn.ToString("MMM dd, yyyy \a\\t hh:mm tt")
+                        </div>
+                    </div>
+
+                    <div>
+                        @if (!n.IsRead)
+                        {
+                            <span class="badge-unread-pill" style="font-size: 10px; font-weight: 700; background: var(--accent-primary); color: var(--text-inverse); padding: 3px 8px; border-radius: 12px;">Unread</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="padding: 48px; text-align: center; color: var(--text-secondary);">
+            <i class="fa-regular fa-bell-slash" style="font-size: 48px; color: var(--accent-primary); margin-bottom: 16px;"></i>
+            <h3 style="color: var(--text-primary);">No Notifications</h3>
+            <p>You're all caught up! There are no notifications to display right now.</p>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+    var processingIds = {};
+
+    var userRole = '@userRole';
+
+    function getTicketUrl(ticketId) {
+        if (!ticketId) return null;
+        if (userRole === 'Administrator') return '/Admin/ManageTicket/' + ticketId;
+        if (userRole === 'Support Executive') return '/Support/Details/' + ticketId;
+        return '/Ticket/Details/' + ticketId;
+    }
+
+    function handleNotificationClick(notifId, ticketId) {
+        var item = document.querySelector('[data-notif-id="' + notifId + '"]');
+
+        // Already read — do nothing
+        if (item && item.classList.contains('read')) return;
+
+        // Prevent duplicate requests
+        if (processingIds[notifId]) return;
+        processingIds[notifId] = true;
+
+        // Optimistic UI update
+        if (item) {
+            item.classList.remove('unread');
+            item.classList.add('read');
+            var msgText = item.querySelector('.notif-message-text');
+            if (msgText) { msgText.style.color = 'var(--text-secondary)'; msgText.style.fontWeight = '400'; }
+            var timeText = item.querySelector('.notif-time-text');
+            if (timeText) { timeText.style.color = 'var(--text-tertiary)'; timeText.style.fontWeight = '400'; }
+            var badge = item.querySelector('.badge-unread-pill');
+            if (badge) badge.remove();
+            var dot = item.querySelector('.unread-dot');
+            if (dot) dot.remove();
+            var navBadge = document.querySelector('.notif-badge');
+            if (navBadge) {
+                var count = parseInt(navBadge.textContent) - 1;
+                if (count > 0) { navBadge.textContent = count; } else { navBadge.remove(); }
+            }
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/Notification/MarkAsRead',
+            data: {
+                id: notifId,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            complete: function () {
+                delete processingIds[notifId];
+            }
+        });
+    }
+    function markAllNotificationsReadPage() {
+        $.ajax({
+            type: 'POST',
+            url: '/Notification/MarkAllAsRead',
+            data: { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+            success: function (res) {
+                if (res.success) { location.reload(); }
+            }
+        });
+    }
+    </script>
+}

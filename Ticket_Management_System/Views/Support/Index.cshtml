@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Support Dashboard";
+    ViewBag.ActiveTab = "SupportDashboard";
+}
+
+<div style="margin-bottom: 32px;">
+    <div class="accent-text">Support Staff Control</div>
+    <h2 class="luxury-heading" style="font-size: 28px; margin-top: 4px; margin-bottom: 0;">Support Executive Dashboard</h2>
+</div>
+
+<div class="stats-grid">
+    <a href="@Url.Action("NeedsPriority")" style="text-decoration: none;">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--warning);"><i class="fa-solid fa-clock"></i></div>
+            <div>
+                <div class="stat-number">@ViewBag.NeedsPriorityCount</div>
+                <div class="stat-label">Needs Priority Review</div>
+            </div>
+        </div>
+    </a>
+
+    <a href="@Url.Action("Board")" style="text-decoration: none;">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--info);"><i class="fa-solid fa-table-columns"></i></div>
+            <div>
+                <div class="stat-number">@ViewBag.BoardCount</div>
+                <div class="stat-label">Active Ticket Board</div>
+            </div>
+        </div>
+    </a>
+
+    <a href="@Url.Action("CompletedArchive")" style="text-decoration: none;">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--success);"><i class="fa-solid fa-box-archive"></i></div>
+            <div>
+                <div class="stat-number">@ViewBag.ArchiveCount</div>
+                <div class="stat-label">Completed Archive</div>
+            </div>
+        </div>
+    </a>
+</div>

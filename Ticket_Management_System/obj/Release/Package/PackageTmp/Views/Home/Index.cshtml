@@ -1,0 +1,70 @@
+@{
+    ViewBag.Title = "Welcome to Simplify";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="home-hero">
+    <!-- Left Hero Column -->
+    <div>
+        <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--accent-primary); border-radius: 10px; margin-bottom: 24px;">
+            <span style="font-size: 24px; font-weight: 800; color: #FFFFFF;">S</span>
+        </div>
+
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent-primary); margin-bottom: 12px;">
+            ENTERPRISE TICKET MANAGEMENT
+        </div>
+
+        <h1 style="font-size: 52px; font-weight: 800; color: var(--text-primary); line-height: 1.1; margin: 0 0 16px 0; font-family: 'Inter', sans-serif;">
+            Every Issue. Resolved.
+        </h1>
+
+        <p style="font-size: 15px; color: var(--text-secondary); max-width: 520px; line-height: 1.75; margin: 0 0 28px 0;">
+            Experience seamless ticket resolution, automated workflows, and real-time support management crafted with luxury precision and performance.
+        </p>
+
+        <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 28px; flex-wrap: wrap;">
+            <a href="@Url.Action("Login", "Account")" class="home-btn-primary">
+                Sign In To Dashboard
+            </a>
+            <a href="@Url.Action("Register", "Account")" class="home-btn-secondary">
+                Create New Account
+            </a>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 16px; font-size: 11px; color: var(--text-tertiary); max-width: 520px;">
+            Trusted by teams across 3 roles &middot; JWT secured &middot; File-based conversation history
+        </div>
+    </div>
+
+    <!-- Right Stat Cards Column -->
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="stat-card-v">
+            <i class="fa-solid fa-bolt" style="font-size: 20px; color: var(--accent-primary); flex-shrink: 0;"></i>
+            <div>
+                <div class="stat-number-v">99.8%</div>
+                <div class="stat-label-v">SYSTEM UPTIME</div>
+            </div>
+        </div>
+        <div class="stat-card-v">
+            <i class="fa-solid fa-headset" style="font-size: 20px; color: var(--accent-primary); flex-shrink: 0;"></i>
+            <div>
+                <div class="stat-number-v">24/7</div>
+                <div class="stat-label-v">SUPPORT AVAILABILITY</div>
+            </div>
+        </div>
+        <div class="stat-card-v">
+            <i class="fa-solid fa-shield-halved" style="font-size: 20px; color: var(--accent-primary); flex-shrink: 0;"></i>
+            <div>
+                <div class="stat-number-v">100%</div>
+                <div class="stat-label-v">SECURE ACCESS</div>
+            </div>
+        </div>
+        <div class="stat-card-v">
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 20px; color: var(--accent-primary); flex-shrink: 0;"></i>
+            <div>
+                <div class="stat-number-v">&lt; 15 min</div>
+                <div class="stat-label-v">AVG. RESPONSE TIME</div>
+            </div>
+        </div>
+    </div>
+</div>

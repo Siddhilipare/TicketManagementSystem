@@ -1,0 +1,424 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>C:\PublishedApps\TicketSystem</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="bin/Antlr3.Runtime.dll">
+      <publishTime>08/03/2026 15:29:54</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.dll">
+      <publishTime>08/03/2026 15:29:48</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.SqlServer.dll">
+      <publishTime>08/03/2026 15:29:48</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AspNet.Identity.Core.dll">
+      <publishTime>08/03/2026 15:30:28</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AspNet.Identity.EntityFramework.dll">
+      <publishTime>08/03/2026 15:30:16</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AspNet.Identity.Owin.dll">
+      <publishTime>08/03/2026 15:30:02</publishTime>
+    </File>
+    <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
+      <publishTime>08/03/2026 15:30:08</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.JsonWebTokens.dll">
+      <publishTime>08/03/2026 15:29:46</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Logging.dll">
+      <publishTime>08/03/2026 15:29:58</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Tokens.dll">
+      <publishTime>08/03/2026 15:29:50</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.dll">
+      <publishTime>08/03/2026 15:30:14</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Host.SystemWeb.dll">
+      <publishTime>08/03/2026 15:29:52</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Cookies.dll">
+      <publishTime>08/03/2026 15:29:58</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.dll">
+      <publishTime>08/03/2026 15:30:12</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Facebook.dll">
+      <publishTime>08/03/2026 15:30:16</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Google.dll">
+      <publishTime>08/03/2026 15:30:04</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.MicrosoftAccount.dll">
+      <publishTime>08/03/2026 15:30:04</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.OAuth.dll">
+      <publishTime>08/03/2026 15:30:04</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Owin.Security.Twitter.dll">
+      <publishTime>08/03/2026 15:30:12</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Practices.EnterpriseLibrary.Common.dll">
+      <publishTime>04/06/2026 12:39:01</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Practices.EnterpriseLibrary.Data.dll">
+      <publishTime>04/06/2026 12:39:01</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Practices.EnterpriseLibrary.Data.SqlCe.dll">
+      <publishTime>04/06/2026 12:39:01</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Practices.ObjectBuilder2.dll">
+      <publishTime>04/06/2026 12:39:01</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Web.Infrastructure.dll">
+      <publishTime>08/03/2026 15:29:52</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>08/03/2026 15:29:42</publishTime>
+    </File>
+    <File Include="bin/Owin.dll">
+      <publishTime>08/03/2026 15:30:08</publishTime>
+    </File>
+    <File Include="bin/roslyn/csc.exe">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.dll">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll">
+      <publishTime>08/03/2026 15:30:28</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CSharp.Core.targets">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.VisualBasic.Core.targets">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Collections.Immutable.dll">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Reflection.Metadata.dll">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/vbc.exe">
+      <publishTime>08/03/2026 15:30:28</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe.config">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/System.IdentityModel.Tokens.Jwt.dll">
+      <publishTime>08/03/2026 15:30:10</publishTime>
+    </File>
+    <File Include="bin/System.Web.Helpers.dll">
+      <publishTime>08/03/2026 15:30:00</publishTime>
+    </File>
+    <File Include="bin/System.Web.Mvc.dll">
+      <publishTime>08/03/2026 15:29:58</publishTime>
+    </File>
+    <File Include="bin/System.Web.Optimization.dll">
+      <publishTime>08/03/2026 15:29:48</publishTime>
+    </File>
+    <File Include="bin/System.Web.Razor.dll">
+      <publishTime>08/03/2026 15:30:26</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Deployment.dll">
+      <publishTime>08/03/2026 15:30:00</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.dll">
+      <publishTime>08/03/2026 15:30:00</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Razor.dll">
+      <publishTime>08/03/2026 15:30:00</publishTime>
+    </File>
+    <File Include="bin/TicketDAL.dll">
+      <publishTime>08/10/2026 11:08:12</publishTime>
+    </File>
+    <File Include="bin/TicketModel.dll">
+      <publishTime>08/10/2026 11:08:12</publishTime>
+    </File>
+    <File Include="bin/Ticket_Management_System.dll">
+      <publishTime>08/10/2026 11:15:52</publishTime>
+    </File>
+    <File Include="bin/WebGrease.dll">
+      <publishTime>08/03/2026 15:29:50</publishTime>
+    </File>
+    <File Include="Content/bootstrap.css">
+      <publishTime>08/03/2026 15:30:38</publishTime>
+    </File>
+    <File Include="Content/bootstrap.min.css">
+      <publishTime>08/03/2026 15:30:38</publishTime>
+    </File>
+    <File Include="Content/Site.css">
+      <publishTime>08/07/2026 12:14:14</publishTime>
+    </File>
+    <File Include="favicon.ico">
+      <publishTime>08/03/2026 15:30:30</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.eot">
+      <publishTime>08/03/2026 15:30:42</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.svg">
+      <publishTime>08/03/2026 15:30:42</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.ttf">
+      <publishTime>08/03/2026 15:30:42</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.woff">
+      <publishTime>08/03/2026 15:30:42</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>08/03/2026 15:30:32</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>08/03/2026 15:30:30</publishTime>
+    </File>
+    <File Include="Scripts/app-ui.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/assistant-bot.js">
+      <publishTime>08/07/2026 12:13:48</publishTime>
+    </File>
+    <File Include="Scripts/bootstrap.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/bootstrap.min.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/jquery-1.10.2.js">
+      <publishTime>08/03/2026 15:30:34</publishTime>
+    </File>
+    <File Include="Scripts/jquery-1.10.2.min.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/jquery-1.10.2.min.map">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/jquery.validate.js">
+      <publishTime>08/03/2026 15:30:34</publishTime>
+    </File>
+    <File Include="Scripts/jquery.validate.min.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/jquery.validate.unobtrusive.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/jquery.validate.unobtrusive.min.js">
+      <publishTime>08/03/2026 15:30:34</publishTime>
+    </File>
+    <File Include="Scripts/modernizr-2.6.2.js">
+      <publishTime>08/03/2026 15:30:34</publishTime>
+    </File>
+    <File Include="Scripts/respond.js">
+      <publishTime>08/03/2026 15:30:36</publishTime>
+    </File>
+    <File Include="Scripts/_references.js">
+      <publishTime>08/03/2026 15:30:34</publishTime>
+    </File>
+    <File Include="Views/Account/AccessDenied.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/ChangePassword.cshtml">
+      <publishTime>08/06/2026 12:59:46</publishTime>
+    </File>
+    <File Include="Views/Account/ConfirmEmail.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/ExternalLoginConfirmation.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/ExternalLoginFailure.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/ForgotPassword.cshtml">
+      <publishTime>08/07/2026 19:00:30</publishTime>
+    </File>
+    <File Include="Views/Account/ForgotPasswordConfirmation.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/Login.cshtml">
+      <publishTime>08/05/2026 15:34:56</publishTime>
+    </File>
+    <File Include="Views/Account/Register.cshtml">
+      <publishTime>08/07/2026 12:14:50</publishTime>
+    </File>
+    <File Include="Views/Account/ResetPassword.cshtml">
+      <publishTime>08/07/2026 19:00:38</publishTime>
+    </File>
+    <File Include="Views/Account/ResetPasswordConfirmation.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/SendCode.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/VerifyCode.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Account/VerifyOtp.cshtml">
+      <publishTime>08/07/2026 19:00:20</publishTime>
+    </File>
+    <File Include="Views/Account/_ExternalLoginsListPartial.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Admin/AdminDashboard.cshtml">
+      <publishTime>08/05/2026 15:30:34</publishTime>
+    </File>
+    <File Include="Views/Admin/AdminTicketDetails.cshtml">
+      <publishTime>08/04/2026 14:41:20</publishTime>
+    </File>
+    <File Include="Views/Admin/AdminTicketEdit.cshtml">
+      <publishTime>08/04/2026 14:42:14</publishTime>
+    </File>
+    <File Include="Views/Admin/AllTickets.cshtml">
+      <publishTime>08/07/2026 12:32:16</publishTime>
+    </File>
+    <File Include="Views/Admin/CreateTicket.cshtml">
+      <publishTime>08/07/2026 12:15:36</publishTime>
+    </File>
+    <File Include="Views/Admin/Dashboard.cshtml">
+      <publishTime>08/05/2026 16:11:34</publishTime>
+    </File>
+    <File Include="Views/Admin/EditTicket.cshtml">
+      <publishTime>08/03/2026 15:30:38</publishTime>
+    </File>
+    <File Include="Views/Admin/EditUser.cshtml">
+      <publishTime>08/07/2026 12:16:16</publishTime>
+    </File>
+    <File Include="Views/Admin/ManageTicket.cshtml">
+      <publishTime>08/08/2026 17:01:20</publishTime>
+    </File>
+    <File Include="Views/Admin/ManageUsers.cshtml">
+      <publishTime>08/08/2026 17:25:52</publishTime>
+    </File>
+    <File Include="Views/Admin/MyComplaints.cshtml">
+      <publishTime>08/05/2026 16:23:10</publishTime>
+    </File>
+    <File Include="Views/Home/About.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Home/Contact.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Home/Index.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Manage/AddPhoneNumber.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Manage/ChangePassword.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Manage/Index.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Manage/ManageLogins.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Manage/SetPassword.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Manage/VerifyPhoneNumber.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/MyAccount/ChangePassword.cshtml">
+      <publishTime>08/05/2026 15:32:46</publishTime>
+    </File>
+    <File Include="Views/MyAccount/Edit.cshtml">
+      <publishTime>08/05/2026 12:50:44</publishTime>
+    </File>
+    <File Include="Views/MyAccount/ForgotPassword.cshtml">
+      <publishTime>08/05/2026 16:09:08</publishTime>
+    </File>
+    <File Include="Views/MyAccount/Index.cshtml">
+      <publishTime>08/06/2026 13:08:10</publishTime>
+    </File>
+    <File Include="Views/Notification/Index.cshtml">
+      <publishTime>08/03/2026 19:39:36</publishTime>
+    </File>
+    <File Include="Views/Shared/Error.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Shared/Lockout.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Shared/_FileChipPickerScript.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Shared/_Layout.cshtml">
+      <publishTime>08/08/2026 15:12:14</publishTime>
+    </File>
+    <File Include="Views/Shared/_LoginPartial.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Shared/_Sidebar.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Shared/_Topbar.cshtml">
+      <publishTime>08/03/2026 15:30:40</publishTime>
+    </File>
+    <File Include="Views/Support/Board.cshtml">
+      <publishTime>08/06/2026 16:50:44</publishTime>
+    </File>
+    <File Include="Views/Support/CompletedArchive.cshtml">
+      <publishTime>08/05/2026 12:36:16</publishTime>
+    </File>
+    <File Include="Views/Support/CreateTicket.cshtml">
+      <publishTime>08/08/2026 16:14:20</publishTime>
+    </File>
+    <File Include="Views/Support/Details.cshtml">
+      <publishTime>08/07/2026 15:04:18</publishTime>
+    </File>
+    <File Include="Views/Support/Index.cshtml">
+      <publishTime>08/05/2026 15:09:52</publishTime>
+    </File>
+    <File Include="Views/Support/MyComplaintDetails.cshtml">
+      <publishTime>08/08/2026 16:15:20</publishTime>
+    </File>
+    <File Include="Views/Support/MyComplaintEdit.cshtml">
+      <publishTime>08/08/2026 16:15:52</publishTime>
+    </File>
+    <File Include="Views/Support/MyComplaints.cshtml">
+      <publishTime>08/08/2026 16:14:52</publishTime>
+    </File>
+    <File Include="Views/Support/NeedsPriority.cshtml">
+      <publishTime>08/05/2026 12:36:40</publishTime>
+    </File>
+    <File Include="Views/Ticket/Create.cshtml">
+      <publishTime>08/07/2026 12:15:18</publishTime>
+    </File>
+    <File Include="Views/Ticket/Details.cshtml">
+      <publishTime>08/05/2026 15:10:48</publishTime>
+    </File>
+    <File Include="Views/Ticket/Edit.cshtml">
+      <publishTime>08/03/2026 16:36:26</publishTime>
+    </File>
+    <File Include="Views/Ticket/Index.cshtml">
+      <publishTime>08/05/2026 13:02:10</publishTime>
+    </File>
+    <File Include="Views/Web.config">
+      <publishTime>08/03/2026 15:30:38</publishTime>
+    </File>
+    <File Include="Views/_ViewStart.cshtml">
+      <publishTime>08/03/2026 15:30:38</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>08/10/2026 11:08:17</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

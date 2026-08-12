@@ -1,0 +1,101 @@
+﻿@{
+    ViewBag.Title = "Raise Complaint";
+    ViewBag.ActiveTab = "Create";
+}
+
+<div style="margin-bottom: 20px;">
+    <a href="@Url.Action("Index", "Ticket")" class="back-link-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to My Complaints
+    </a>
+</div>
+
+<div class="luxury-card" style="max-width: 800px; margin: 0 auto; padding: 40px;">
+    <div style="margin-bottom: 32px;">
+        <div class="accent-text">New Request</div>
+        <h2 class="luxury-heading" style="font-size: 32px; margin-top: 4px; margin-bottom: 8px;">Raise a Complaint</h2>
+        <p style="color: var(--text-secondary); margin: 0;">Provide details below to open a new support ticket with our team.</p>
+    </div>
+
+    @using (Html.BeginForm("Create", "Ticket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            <label class="form-label">Complaint Title <span style="color: var(--error);">*</span> <span style="font-size:11px;color:var(--text-tertiary);">(3�100 characters)</span></label>
+            <input type="text" name="Title" id="ticketTitle" class="form-control"
+                   placeholder="e.g. System hardware issue / Software crash"
+                   data-max-length="100" data-min-length="3" data-field-label="Complaint Title" required />
+            <span id="titleErr" style="color:var(--error);font-size:11px;display:none;">Title must be at least 3 characters.</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Detailed Description <span style="color: var(--error);">*</span> <span style="font-size:11px;color:var(--text-tertiary);">(10�2000 characters)</span></label>
+            <textarea name="Description" id="ticketDesc" class="form-control" rows="5"
+                      placeholder="Explain the issue, steps to reproduce, or error messages in detail..."
+                      data-max-length="2000" data-min-length="10" data-field-label="Detailed Description" required></textarea>
+            <span id="descErr" style="color:var(--error);font-size:11px;display:none;">Description must be at least 10 characters.</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Attachments (Optional, max 5 files, 5MB each)</label>
+            <div class="file-upload-box" onclick="document.getElementById('attachmentInput').click();">
+                <i class="fa-solid fa-cloud-arrow-up file-upload-icon"></i>
+                <div style="font-weight: 600; color: var(--text-primary);">Click or Drag & Drop files here</div>
+                <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Supported: PNG, JPG, GIF, PDF, TXT, DOC, DOCX</div>
+            </div>
+            <input type="file" id="attachmentInput" name="Attachments" multiple style="display: none;" />
+            <div id="fileChipList" class="file-chip-list" style="margin-top: 12px;"></div>
+            <div id="fileError" class="text-danger small" style="display:none; margin-top:6px;"></div>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 32px;">
+            <button type="submit" class="btn-primary-gold"><i class="fa-solid fa-paper-plane"></i> Submit Complaint</button>
+            <a href="@Url.Action("Index")" class="btn-secondary-gold"><i class="fa-solid fa-xmark"></i> Cancel</a>
+        </div>
+    }
+</div>
+
+@section scripts {
+    @Html.Partial("_FileChipPickerScript")
+    <script>
+    // Live character counters, the red "over-limit" state, and the
+    // block-and-clear-only-the-invalid-field behavior on Save/Submit are all
+    // handled by AssistantBot.CharLimitGuard (see assistant-bot.js) for any
+    // field carrying data-max-length — that's Title and Description here.
+    // This script only owns the separate "too short" (below minimum) check,
+    // which the guard intentionally leaves alone.
+    document.addEventListener("DOMContentLoaded", function () {
+        var form = document.querySelector("form");
+        if (!form) return;
+
+        // Capture phase, same as the char-limit guard's own listener on this
+        // form. A value can never be both over the max and under the min at
+        // once, so the two checks never fight over the same field.
+        form.addEventListener("submit", function (e) {
+            var title = document.getElementById("ticketTitle");
+            var desc = document.getElementById("ticketDesc");
+
+            if (title && title.value.trim().length > 0 && title.value.trim().length < 3) {
+                document.getElementById("titleErr").style.display = "inline";
+                title.focus();
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                return;
+            }
+            document.getElementById("titleErr").style.display = "none";
+
+            if (desc && desc.value.trim().length > 0 && desc.value.trim().length < 10) {
+                document.getElementById("descErr").style.display = "inline";
+                desc.focus();
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                return;
+            }
+            document.getElementById("descErr").style.display = "none";
+        }, true);
+    });
+    </script>
+}

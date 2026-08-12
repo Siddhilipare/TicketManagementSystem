@@ -1,0 +1,226 @@
+layout.cshtml
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>@ViewBag.Title - CineLux</title>
+
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css?family=Rubik:400,700|Crimson+Text:400,400i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- TEMPLATE CSS -->
+    <link rel="stylesheet" href="~/Content/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/css/jquery-ui.css" />
+    <link rel="stylesheet" href="~/Content/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/Content/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="~/Content/css/magnific-popup.css" />
+    <link rel="stylesheet" href="~/Content/css/aos.css" />
+    <link rel="stylesheet" href="~/Content/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    @*18 jun seperating css from _Layout.cshtml*@
+    <link href="~/Content/css/RequiredCSS/_Layout.css?v=1.1" rel="stylesheet" />
+
+    @Styles.Render("~/Content/css")
+
+    @*Only the required CSS is loaded.*@
+    @RenderSection("Styles", required: false)
+   
+ 
+</head>
+
+<body style="overflow:hidden;">
+    
+    <div id="startupLoader">
+
+        <div class="loader-content">
+
+            <div class="cinelux-spinner"></div>
+
+            <div class="loader-title">
+
+                CINELUX
+
+            </div>
+
+            <div class="loader-text">
+
+                LOADING MOVIE EXPERIENCE...
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="site-wrap">
+        <!-- NAVBAR START -->
+
+        <div class="site-navbar py-2 bg-dark">
+
+            <div class="container">
+
+                <div class="d-flex align-items-center justify-content-between">
+
+                    <!-- LOGO -->
+                    <div class="logo">
+
+                        <div class="site-logo">
+
+                            @Html.ActionLink(
+                            "CineLux",
+                            "Index",
+                            "Home",
+                            null,
+                            new { @class = "js-logo-clone text-white text-decoration-none fs-2 fw-bold" }
+                        )
+
+                        </div>
+
+                    </div>
+
+                    <!-- MOBILE MENU TOGGLE -->
+                    <a href="#" class="site-menu-toggle js-menu-toggle text-white d-lg-none">
+                        <span class="bi bi-list"></span>
+                    </a>
+
+                    <!-- NAVIGATION -->
+                    <div class="main-nav ms-5">
+                        <nav class="site-navigation text-right text-md-center">
+
+                            <ul class="site-menu js-clone-nav d-none d-lg-block">
+                                <li>
+                                    <a href="@Url.Action("Index","Home")">
+
+                                        <i class="bi bi-house-door-fill nav-icon"></i>
+
+                                        Home
+
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="@Url.Action("About","Home")">
+
+                                        <i class="bi bi-info-circle-fill nav-icon"></i>
+
+                                        About
+
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="@Url.Action("Contact","Home")">
+
+                                        <i class="bi bi-envelope-fill nav-icon"></i>
+
+                                        Contact
+
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                        </nav>
+
+                    </div>
+
+                    <!-- LOGIN DESKTOP -->
+                    <div class="desktop-auth">
+
+                        @Html.Partial("_LoginPartial")
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- NAVBAR END -->
+        <!-- PAGE CONTENT -->
+
+        <div id="mainWebsite" style="visibility:hidden;">
+
+            @RenderBody()
+
+        </div>
+
+        <!-- FOOTER START -->
+
+        <footer class="site-footer">
+
+            <div class="container">
+
+                <div class="row pt-5 mt-5 text-center">
+
+                    <div class="col-md-12">
+
+                        <p>
+                            © @DateTime.Now.Year - CineLux
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+        <!-- FOOTER END -->
+    </div>
+    <!-- .site-wrap END -->
+    <!-- JS FILES -->
+
+    <script src="~/Content/js/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src="~/Content/js/jquery-ui.js"></script>
+
+    <script src="~/Content/js/popper.min.js"></script>
+
+    <script src="~/Content/js/bootstrap.min.js"></script>
+
+    <script src="~/Content/js/owl.carousel.min.js"></script>
+
+    <script src="~/Content/js/jquery.magnific-popup.min.js"></script>
+
+    <script src="~/Content/js/aos.js"></script>
+
+    <script src="~/Content/js/main.js"></script>
+
+    @*18 jun seperating js from _Layout.cshtml*@
+    <script src="~/Content/js/RequiredJS/_Layout.js"></script>
+
+        @if (TempData["ToastMessage"] != null)
+        {
+            <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            newestOnTop: true,
+            positionClass: "toast-top-right",
+            timeOut: 3500,
+            extendedTimeOut: 1000,
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+        };
+
+        toastr['@(TempData["ToastType"] ?? "success")'](
+            '@TempData["ToastMessage"]',
+            'CineLux'
+        );
+            </script>
+        }
+    @RenderSection("scripts", required: false)
+   
+ 
+</body>
+</html>

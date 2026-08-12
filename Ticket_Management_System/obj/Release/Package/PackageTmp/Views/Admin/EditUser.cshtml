@@ -1,0 +1,55 @@
+@model TicketModel.ViewModels.EditUserViewModel
+@{
+    ViewBag.Title = "Edit User";
+    ViewBag.ActiveTab = "AdminUsers";
+}
+
+<div style="margin-bottom: 20px;">
+    <a href="@Url.Action("ManageUsers", "Admin")" class="back-link-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Manage Users
+    </a>
+</div>
+
+<div class="luxury-card" style="max-width: 560px; margin: 0 auto; padding: 40px;">
+    <div style="margin-bottom: 28px;">
+        <div class="accent-text">User Management</div>
+        <h2 class="luxury-heading" style="font-size: 26px; margin-top: 4px; margin-bottom: 0;">Edit User Account</h2>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" style="margin-bottom: 20px;">@TempData["ErrorMessage"]</div>
+    }
+
+    @Html.ValidationSummary(false, "", new { @class = "alert alert-danger", style = "margin-bottom:16px;" })
+
+    @using (Html.BeginForm("EditUser", "Admin", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.UserId)
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Full Name <span style="font-size:11px;color:var(--text-tertiary);">(2-80 characters)</span></label>
+            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "e.g. John Smith", autocomplete = "off", data_max_length = "80", data_min_length = "2", data_field_label = "Full Name" })
+            @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger small" })
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Assign Role</label>
+            @Html.DropDownListFor(m => m.RoleId, new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Administrator", Value = "1" },
+                new SelectListItem { Text = "Support Executive", Value = "2" },
+                new SelectListItem { Text = "Employee", Value = "3" }
+            }, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.RoleId, "", new { @class = "text-danger small" })
+        </div>
+
+        <div style="display: flex; gap: 14px; margin-top: 32px;">
+            <button type="submit" class="btn-primary-gold" style="flex: 1;">
+                <i class="fa-solid fa-floppy-disk"></i> Save Changes
+            </button>
+            <a href="@Url.Action("ManageUsers", "Admin")" class="btn-secondary-gold">Cancel</a>
+        </div>
+    }
+</div>

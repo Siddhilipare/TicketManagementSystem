@@ -1,0 +1,1135 @@
+Movie controller
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using ListDal;
+using List.ViewModels;
+using ListModel.ViewModel;
+using ListDal.Dal;
+
+namespace List.Controllers
+{
+    public class MovieController : Controller
+    {
+        public ActionResult MovieList( )
+        {
+            MovieDal moviedal = new MovieDal();
+            var movieList = moviedal.GetMovieList();
+
+            return View(movieList);
+        }
+
+        public ActionResult Create()
+        {
+
+            return View();
+        }
+
+        /*18 May Admin->Create movie */
+        [HttpPost]
+        public ActionResult Create(MovieViewModel movie)
+        {
+            try
+            {
+
+                movie.CreatedBy = 1;
+                movie.LastModifiedBy = 1;
+                movie.IsActive = true;
+
+
+                MovieDal moviedal = new MovieDal();
+
+                int result = moviedal.InsertMovie(movie);
+
+                if (result > 0)
+                {
+                    return RedirectToAction("MovieList");
+                }
+
+                return View(movie);
+            }
+
+            catch
+            {
+                throw;
+            }
+        }
+
+        /*19 May Edit controller*/
+
+        
+        public ActionResult EditMovie(int movieID)
+        {
+            MovieDal moviedal = new MovieDal();
+            MovieViewModel movie = moviedal.GetMovieById(movieID);
+
+            return View(movie);
+        }
+        [HttpPost]
+        public ActionResult EditMovie(MovieViewModel movie)
+        {
+            movie.LastModifiedBy = 1;
+
+            MovieDal moviedal = new MovieDal();
+
+            int result = moviedal.UpdateMovie(movie);
+
+            if (result > 0)
+            {
+                return RedirectToAction("MovieList");
+            }
+
+            return View(movie);
+        }
+
+        /*Delete movie controller*/
+        [HttpPost]
+        public ActionResult DeleteMovie(int movieID)
+        {
+            MovieDal moviedal = new MovieDal();
+            MovieViewModel movie = moviedal.GetMovieById(movieID);
+
+            return View(movie);
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------
+MOVIE DAL
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using ListModel.ViewModel;
+
+namespace ListDal.Dal
+{
+    public class MovieDal
+    {
+        private Database db;
+
+        public MovieDal()
+        {
+            this.db = DatabaseFactory.CreateDatabase();
+        }
+
+        public List<MovieViewModel> GetMovieList()
+        {
+            List<MovieViewModel> movieList = new List<MovieViewModel>();
+
+            try
+            {
+                DbCommand dbCommand = db.GetStoredProcCommand("GetMovieList");
+
+                DataSet ds = db.ExecuteDataSet(dbCommand);
+
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        MovieViewModel movie = new MovieViewModel
+                        {
+                            MovieID = row["MovieID"] != DBNull.Value
+         ? Convert.ToInt32(row["MovieID"])
+         : 0,
+
+                            MovieName = row["MovieName"] != DBNull.Value
+         ? row["MovieName"].ToString()
+         : "",
+
+                            Description = row["Description"] != DBNull.Value
+         ? row["Description"].ToString()
+         : "",
+
+                            MovieImage = row["MovieImage"] != DBNull.Value
+         ? row["MovieImage"].ToString()
+         : "",
+
+                            Duration = row["Duration"] != DBNull.Value
+         ? Convert.ToInt32(row["Duration"])
+         : 0,
+
+                            Language = row["Language"] != DBNull.Value
+         ? row["Language"].ToString()
+         : "",
+
+                            Genre = row["Genre"] != DBNull.Value
+         ? row["Genre"].ToString()
+         : "",
+
+                            ReleaseDate = row["ReleaseDate"] != DBNull.Value
+         ? Convert.ToDateTime(row["ReleaseDate"])
+         : DateTime.MinValue,
+
+                            IsActive = row["IsActive"] != DBNull.Value
+         ? Convert.ToBoolean(row["IsActive"])
+         : false,
+
+                            CreatedAt = row["CreatedAt"] != DBNull.Value
+         ? Convert.ToDateTime(row["CreatedAt"])
+         : DateTime.MinValue,
+
+                            CreatedBy = row["CreatedBy"] != DBNull.Value
+         ? Convert.ToInt32(row["CreatedBy"])
+         : 0,
+
+                            LastModifiedAt = row["LastModifiedAt"] != DBNull.Value
+         ? Convert.ToDateTime(row["LastModifiedAt"])
+         : DateTime.MinValue,
+
+                            LastModifiedBy = row["LastModifiedBy"] != DBNull.Value
+         ? Convert.ToInt32(row["LastModifiedBy"])
+         : 0
+                        };
+
+                        movieList.Add(movie);
+                    }
+                }
+            }
+            catch
+            {
+                throw;
+            }
+
+            return movieList;
+        }
+
+        /*18 May Admin->Create movie */
+        public int InsertMovie(MovieViewModel movie)
+        {
+            int resultIsInserted = 0;
+
+            try
+            {
+
+                DbCommand com = db.GetStoredProcCommand("InsertMovieinDb");
+
+                db.AddInParameter(com, "@MovieName", DbType.String,
+                    !string.IsNullOrEmpty(movie.MovieName)
+                                               ? (object)movie.MovieName
+                                               : DBNull.Value);
+                db.AddInParameter(com, "@Description", DbType.String, movie.Description);
+
+                db.AddInParameter(com, "@MovieImage", DbType.String, movie.MovieImage);
+                db.AddInParameter(com, "@Duration", DbType.Int32, movie.Duration);
+                db.AddInParameter(com, "@Language", DbType.String, movie.Language);
+                db.AddInParameter(com, "@Genre", DbType.String, movie.Genre);
+                db.AddInParameter(com, "@ReleaseDate", DbType.DateTime, movie.ReleaseDate);
+                db.AddInParameter(com, "@IsActive", DbType.Boolean, movie.IsActive);
+                db.AddInParameter(com, "@CreatedBy", DbType.Int32, movie.CreatedBy);
+                db.AddInParameter(com, "@LastModifiedBy", DbType.Int32, movie.LastModifiedBy);
+
+
+                resultIsInserted = db.ExecuteNonQuery(com);
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+            return resultIsInserted;
+        }
+
+        /*19MAY Getting moviedetails through Id*/
+
+        public MovieViewModel GetMovieById(int MovieId)
+        {
+            MovieViewModel movie = new MovieViewModel();
+
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("GetMovieById");
+
+                db.AddInParameter(com, "@MovieId", DbType.Int32, MovieId);
+
+                DataSet ds = db.ExecuteDataSet(com);
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    DataRow row = ds.Tables[0].Rows[0];
+
+                    movie.MovieID = row["MovieID"] != DBNull.Value
+         ? Convert.ToInt32(row["MovieID"])
+         : 0;
+
+                    movie.MovieName = row["MovieName"] != DBNull.Value
+        ? row["MovieName"].ToString()
+        : "";
+
+                    movie.Description = row["Description"] != DBNull.Value
+         ? row["Description"].ToString()
+         : "";
+
+                    movie.MovieImage = row["MovieImage"] != DBNull.Value
+ ? row["MovieImage"].ToString()
+ : "";
+
+                    movie.Duration = row["Duration"] != DBNull.Value
+  ? Convert.ToInt32(row["Duration"])
+  : 0;
+
+                    movie.Language = row["Language"] != DBNull.Value
+ ? row["Language"].ToString()
+ : "";
+
+                    movie.Genre = row["Genre"] != DBNull.Value
+  ? row["Genre"].ToString()
+  : "";
+
+                    movie.ReleaseDate = row["ReleaseDate"] != DBNull.Value
+  ? Convert.ToDateTime(row["ReleaseDate"])
+  : DateTime.MinValue;
+
+                    movie.IsActive = row["IsActive"] != DBNull.Value
+  ? Convert.ToBoolean(row["IsActive"])
+  : false;
+
+                    movie.CreatedAt = row["CreatedAt"] != DBNull.Value
+  ? Convert.ToDateTime(row["CreatedAt"])
+  : DateTime.MinValue;
+
+                    movie.CreatedBy = row["CreatedBy"] != DBNull.Value
+  ? Convert.ToInt32(row["CreatedBy"])
+  : 0;
+
+                    movie.LastModifiedAt = row["LastModifiedAt"] != DBNull.Value
+  ? Convert.ToDateTime(row["LastModifiedAt"])
+  : DateTime.MinValue;
+
+                    movie.LastModifiedBy = row["LastModifiedBy"] != DBNull.Value
+   ? Convert.ToInt32(row["LastModifiedBy"])
+   : 0;
+                }
+
+            }
+            catch
+            {
+                throw;
+            }
+            return movie;
+        }
+
+        /*19 may Edit Movie*/
+        public int UpdateMovie(MovieViewModel movie)
+        {
+            int resultIsUpdated = 0;
+
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("UpdateMovie");
+                db.AddInParameter(com, "@MovieID", DbType.Int32, movie.MovieID);
+                db.AddInParameter(com, "@MovieName", DbType.String, !string.IsNullOrEmpty(movie.MovieName) ? (object)movie.MovieName : DBNull.Value);
+                db.AddInParameter(com, "@Description", DbType.String, movie.Description);
+                db.AddInParameter(com, "@MovieImage", DbType.String, movie.MovieImage);
+                db.AddInParameter(com, "@Duration", DbType.Int32, movie.Duration);
+                db.AddInParameter(com, "@Language", DbType.String, movie.Language);
+                db.AddInParameter(com, "@Genre", DbType.String, movie.Genre);
+                db.AddInParameter(com, "@ReleaseDate", DbType.DateTime, movie.ReleaseDate);
+                db.AddInParameter(com, "@IsActive", DbType.Boolean, movie.IsActive);
+                db.AddInParameter(com, "@LastModifiedBy", DbType.Int32, movie.LastModifiedBy);
+
+                resultIsUpdated = db.ExecuteNonQuery(com);
+            }
+
+            catch
+            {
+                throw;
+            }
+
+            return resultIsUpdated;
+        }
+
+        /*19 may Delete Movie*/
+
+        public int Deletemovie(int MovieId)
+        {
+            int resultIsDeleted = 0;
+
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("DeleteMovie");
+                db.AddInParameter(com, "@MovieId", DbType.Int32, MovieId);
+                resultIsDeleted = db.ExecuteNonQuery(com);
+            }
+            catch
+            {
+                throw;
+            }
+            return resultIsDeleted;
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------
+
+CREATE VIEW
+
+@model ListModel.ViewModel.MovieViewModel
+@{
+    ViewBag.Title = "Create";
+}
+<div id="mainContainer">
+
+    <h2>ADD MOVIE</h2>
+
+    @using (Html.BeginForm())
+    {
+        <div class="movie-form-container">
+
+            <div class="form-group">
+
+                <label>Movie Name</label>
+               
+                @Html.TextBoxFor(
+                    x => x.MovieName,
+                    new
+                    {
+                        @class = "luxury-input",
+                        placeholder = "Enter movie name"
+                    })
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Description</label>
+
+                @Html.TextAreaFor(
+                    x => x.Description,
+                    new
+                    {
+                        @class = "luxury-input",
+                        rows = 4,
+                        placeholder = "Enter movie description"
+                    })
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Movie Image</label>
+
+                @Html.TextBoxFor(
+                    x => x.MovieImage,
+                    new
+                    {
+                        @class = "luxury-input",
+                        placeholder = "Poster image path"
+                    })
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group half">
+
+                    <label>Duration (mins)</label>
+
+                    @Html.TextBoxFor(
+                        x => x.Duration,
+                        new
+                        {
+                            @class = "luxury-input",
+                            placeholder = "120"
+                        })
+
+                </div>
+
+
+                <div class="form-group half">
+
+                    <label>Release Date</label>
+
+                    @Html.TextBoxFor(
+                        x => x.ReleaseDate,
+                        "{0:yyyy-MM-dd}",
+                        new
+                        {
+                            type = "date",
+                            @class = "luxury-input"
+                        })
+
+                </div>
+
+            </div>
+
+
+
+            <div class="form-row">
+
+                <div class="form-group half">
+
+                    <label>Language</label>
+
+                    @Html.DropDownListFor(
+                        x => x.Language,
+
+                        new List<SelectListItem>
+                        {
+                            new SelectListItem{Text="English",Value="English"},
+                            new SelectListItem{Text="Hindi",Value="Hindi"},
+                            new SelectListItem{Text="Marathi",Value="Marathi"},
+                            new SelectListItem{Text="Korean",Value="Korean"},
+                            new SelectListItem{Text="Spanish",Value="Spanish"}
+
+                        },
+
+                        "--Select--",
+
+                        new { @class = "luxury-input" })
+
+                </div>
+
+
+
+                <div class="form-group half">
+
+                    <label>Genre</label>
+
+                    @Html.DropDownListFor(
+                        x => x.Genre,
+
+                        new List<SelectListItem>
+                        {
+                            new SelectListItem{Text="Action",Value="Action"},
+                            new SelectListItem{Text="Drama",Value="Drama"},
+                            new SelectListItem{Text="Comedy",Value="Comedy"},
+                            new SelectListItem{Text="Sci-Fi",Value="Sci-Fi"},
+                            new SelectListItem{Text="Thriller",Value="Thriller"},
+                            new SelectListItem{Text="Horror",Value="Horror"}
+
+                        },
+
+                        "--Select--",
+
+                        new { @class = "luxury-input" })
+
+                </div>
+
+            </div>
+
+
+
+            <div class="text-center">
+
+                <button type="submit"
+                        class="luxury-btn">
+
+                    SAVE MOVIE
+
+                </button>
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+
+
+<style>
+    .movie-form-container {
+        max-width: 750px;
+        margin: auto;
+        padding: 35px;
+        border-radius: 22px;
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(212,175,55,0.18);
+        box-shadow: 0 10px 40px rgba(0,0,0,.4);
+    }
+
+
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+
+
+
+    .half {
+        flex: 1;
+    }
+
+
+
+    .luxury-input {
+        width: 100%;
+        background: #173328;
+        border: 1px solid rgba(212,175,55,.25);
+        color: #F5E6B3;
+        padding: 12px;
+        border-radius: 12px;
+        outline: none;
+    }
+
+
+
+        .luxury-input:focus {
+            border-color: #D4AF37;
+            box-shadow: 0 0 12px rgba(212,175,55,.25);
+        }
+
+
+
+    .luxury-btn {
+        background: linear-gradient( 135deg, #D4AF37, #F5E6B3 );
+        color: black;
+        border: none;
+        padding: 14px 34px;
+        border-radius: 40px;
+        font-weight: 700;
+        transition: .3s;
+    }
+
+
+
+        .luxury-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(212,175,55,.35);
+        }
+</style>
+
+
+-------------------------------------------------------------------------------------------------------------
+
+
+EDIT MOVIE
+
+@model ListModel.ViewModel.MovieViewModel
+
+@{
+    ViewBag.Title = "EditMovie";
+}
+
+<div id="mainContainer">
+    <h2>Edit Movie</h2>
+
+  @using (Html.BeginForm())
+    {
+        <div class="movie-form-container">
+
+            <div class="form-group">
+
+                <label>Movie Name</label>
+                @Html.HiddenFor(x => x.MovieID)
+
+                @Html.TextBoxFor(
+                    x => x.MovieName,
+                    new
+                    {
+                        @class = "luxury-input",
+                        placeholder = "Enter movie name"
+                    })
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Description</label>
+
+                @Html.TextAreaFor(
+                    x => x.Description,
+                    new
+                    {
+                        @class = "luxury-input",
+                        rows = 4,
+                        placeholder = "Enter movie description"
+                    })
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Movie Image</label>
+
+                @Html.TextBoxFor(
+                    x => x.MovieImage,
+                    new
+                    {
+                        @class = "luxury-input",
+                        placeholder = "Poster image path"
+                    })
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group half">
+
+                    <label>Duration (mins)</label>
+
+                    @Html.TextBoxFor(
+                        x => x.Duration,
+                        new
+                        {
+                            @class = "luxury-input",
+                            placeholder = "120"
+                        })
+
+                </div>
+
+
+                <div class="form-group half">
+
+                    <label>Release Date</label>
+
+                    @Html.TextBoxFor(
+                        x => x.ReleaseDate,
+                        "{0:yyyy-MM-dd}",
+                        new
+                        {
+                            type = "date",
+                            @class = "luxury-input"
+                        })
+
+                </div>
+
+            </div>
+
+
+
+            <div class="form-row">
+
+                <div class="form-group half">
+
+                    <label>Language</label>
+
+                    @Html.DropDownListFor(
+                        x => x.Language,
+
+                        new List<SelectListItem>
+                        {
+                            new SelectListItem{Text="English",Value="English"},
+                            new SelectListItem{Text="Hindi",Value="Hindi"},
+                            new SelectListItem{Text="Marathi",Value="Marathi"},
+                            new SelectListItem{Text="Korean",Value="Korean"},
+                            new SelectListItem{Text="Spanish",Value="Spanish"}
+
+                        },
+
+                        "--Select--",
+
+                        new { @class = "luxury-input" })
+
+                </div>
+
+
+
+                <div class="form-group half">
+
+                    <label>Genre</label>
+
+                    @Html.DropDownListFor(
+                        x => x.Genre,
+
+                        new List<SelectListItem>
+                        {
+                            new SelectListItem{Text="Action",Value="Action"},
+                            new SelectListItem{Text="Drama",Value="Drama"},
+                            new SelectListItem{Text="Comedy",Value="Comedy"},
+                            new SelectListItem{Text="Sci-Fi",Value="Sci-Fi"},
+                            new SelectListItem{Text="Thriller",Value="Thriller"},
+                            new SelectListItem{Text="Horror",Value="Horror"}
+
+                        },
+
+                        "--Select--",
+
+                        new { @class = "luxury-input" })
+
+                </div>
+
+            </div>
+
+
+
+            <div class="text-center">
+
+                <button type="submit"
+                        class="luxury-btn">
+
+                    UPDATE MOVIE
+
+                </button>
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+
+
+<style>
+    .movie-form-container {
+        max-width: 750px;
+        margin: auto;
+        padding: 35px;
+        border-radius: 22px;
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(212,175,55,0.18);
+        box-shadow: 0 10px 40px rgba(0,0,0,.4);
+    }
+
+
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+
+
+
+    .half {
+        flex: 1;
+    }
+
+
+
+    .luxury-input {
+        width: 100%;
+        background: #173328;
+        border: 1px solid rgba(212,175,55,.25);
+        color: #F5E6B3;
+        padding: 12px;
+        border-radius: 12px;
+        outline: none;
+    }
+
+
+
+        .luxury-input:focus {
+            border-color: #D4AF37;
+            box-shadow: 0 0 12px rgba(212,175,55,.25);
+        }
+
+
+
+    .luxury-btn {
+        background: linear-gradient( 135deg, #D4AF37, #F5E6B3 );
+        color: black;
+        border: none;
+        padding: 14px 34px;
+        border-radius: 40px;
+        font-weight: 700;
+        transition: .3s;
+    }
+
+
+
+        .luxury-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(212,175,55,.35);
+        }
+</style>
+
+
+
+---------------------------------------------------------------------------------------------------------
+
+DELETE MOVIE
+
+@model ListModel.ViewModel.MovieViewModel
+
+@{
+    ViewBag.Title = "DeleteMovie";
+}
+
+
+<div class="delete-container">
+
+    @using (Html.BeginForm())
+    {
+        @Html.HiddenFor(x => x.MovieID)
+
+        <h2>DELETE MOVIE</h2>
+
+        <p class="warning-text">
+
+            Are you sure you want to Delete this movie?
+
+        </p>
+
+
+        <div class="movie-card">
+
+            <img src="~/Images/@Model.MovieImage"
+                 class="movie-img" />
+
+
+            <div>
+
+                <h3>@Model.MovieName</h3>
+
+                <p>
+                    <b>Genre:</b>
+                    @Model.Genre
+                </p>
+
+                <p>
+                    <b>Language:</b>
+                    @Model.Language
+                </p>
+
+                <p>
+                    <b>Duration:</b>
+                    @Model.Duration mins
+                </p>
+
+                <p>
+                    <b>Description:</b>
+                    @Model.Description
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="btn-section">
+
+            <button type="submit"
+                    class="delete-btn">
+
+                DELETE MOVIE
+
+            </button>
+
+
+            <a href="@Url.Action("MovieList","Movie")"
+               class="cancel-btn">
+
+                CANCEL
+
+            </a>
+
+        </div>
+
+    }
+
+</div>
+
+
+
+<style>
+    .delete-container {
+        max-width: 700px;
+        margin: auto;
+        padding: 30px;
+    }
+
+
+    .warning-text {
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+
+    .movie-card {
+        display: flex;
+        gap: 25px;
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,.1);
+    }
+
+
+    .movie-img {
+        width: 150px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+
+    .btn-section {
+        margin-top: 25px;
+        display: flex;
+        gap: 20px;
+    }
+
+
+    .delete-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+    }
+
+
+    .cancel-btn {
+        background: #6c757d;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+</style>
+
+-----------------------------------------------------------------------------
+
+MOVIELIST
+
+@model List<ListModel.ViewModel.MovieViewModel>
+
+<div id="mainContainer">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2>MOVIE LIST</h2>
+        <a href="@Url.Action("Create","Movie")"
+           class="luxury-btn">
+            + ADD MOVIE
+
+        </a>
+    </div>
+
+
+    <div id="tableContainer">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Movie Image</th>
+                    <th>Movie Name</th>
+                    <th>Description</th>
+                    <th>Genre</th>
+                    <th>Language</th>
+                    <th>Duration</th>
+                    <th>Release Date</th>
+                    <th>IsActive</th>
+                    <th>CreatedAt</th>
+                    <th>CreatedBy</th>
+                    <th>LastModifiedAt</th>
+                    <th>LastModifiedBy</th>
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+
+                            <img src="~/Images/@item.MovieImage"
+                                 class="movie-img" />
+
+                        </td>
+
+                        <td>@item.MovieName</td>
+
+                        <td class="movie-description"
+                            title="@item.Description">
+                            @item.Description
+                        </td>
+
+                        <td>@item.Genre</td>
+
+                        <td>@item.Language</td>
+
+                        <td>@item.Duration mins</td>
+
+                        <td>
+                            @item.ReleaseDate.ToString("dd MMM yyyy")
+                        </td>
+
+                        <td>@item.IsActive</td>
+
+                        <td>
+                            @item.CreatedAt.ToString("dd-MM-yyyy")
+                        </td>
+
+                        <td>@item.CreatedBy</td>
+
+                        <td>
+                            @item.LastModifiedAt.ToString("dd-MM-yyyy")
+                        </td>
+
+                        <td>@item.LastModifiedBy</td>
+
+                        <td>
+
+                            <a class="btn btn-primary btn-sm"
+                               href="@Url.Action("EditMovie","Movie",
+                                new { movieID=item.MovieID })">
+
+                                EDIT
+
+                            </a>
+
+
+                            <a class="btn btn-danger btn-sm"
+                               href="@Url.Action("DeleteMovie","Movie",
+                               new { movieID=item.MovieID })">
+
+                                DELETE
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<style>
+    
+    .luxury-btn {
+        background: linear-gradient( 135deg, #D4AF37, #F5E6B3 );
+        color: black;
+        border: none;
+        padding: 14px 34px;
+        border-radius: 40px;
+        font-weight: 700;
+        transition: .3s;
+        /*margin-left:0px;*/
+    }
+
+
+
+        .luxury-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(212,175,55,.35);
+            color:black;
+            font-size:large;
+        }
+</style>
+

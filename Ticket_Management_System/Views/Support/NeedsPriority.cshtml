@@ -1,0 +1,138 @@
+@model IEnumerable<TicketModel.Models.TicketModel>
+@using System.Linq
+@{
+    ViewBag.Title = "Needs Priority";
+    ViewBag.ActiveTab = "SupportDashboard";
+}
+
+<div style="margin-bottom: 20px;">
+    <a href="@Url.Action("Index", "Support")" class="back-link-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div style="margin-bottom: 28px;">
+    <div class="accent-text">Priority Assignment</div>
+    <h2 class="luxury-heading" style="font-size: 28px; margin-top: 4px; margin-bottom: 6px;">Tickets Awaiting Priority</h2>
+    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 0;">Review each newly assigned complaint and set its priority to move it onto your board.</p>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background: rgba(102, 187, 106, 0.15); border: 1px solid var(--success); color: var(--success); padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 20px;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<!-- SEARCH + FILTER BAR -->
+<div class="luxury-card" style="padding: 20px; margin-bottom: 24px; position: relative; z-index: 100;">
+    <form id="npFilterForm" method="get" data-search="@(ViewBag.Search ?? "")" data-date="@(ViewBag.SelectedDate ?? "")" data-sort-order="@(ViewBag.SortOrder ?? "newest")" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+        <div style="flex-grow: 1; min-width: 240px;">
+            <input type="text" name="search" id="npSearch" value="@ViewBag.Search"
+                   placeholder="Search by title, employee name, or ID..." class="form-control" />
+        </div>
+
+        <div class="dropdown" style="position: relative;">
+            <button type="button" class="btn-secondary-gold dropdown-toggle" data-toggle="dropdown"
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;">
+                <i class="fa-solid fa-filter" style="font-size: 16px; color: var(--accent-primary);"></i>
+                <span>Filter</span>
+                <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right funnel-filter-panel" onclick="event.stopPropagation();">
+                <div style="font-weight: 700; color: var(--accent-primary); font-size: 13px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <span><i class="fa-solid fa-filter" style="margin-right: 4px;"></i> Funnel Filter</span>
+                    <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">Refine List</span>
+                </div>
+                <div style="margin-bottom: 16px; background: var(--bg-tertiary); padding: 14px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                    <label class="form-label" style="font-size: 12px; margin-bottom: 6px; color: var(--accent-primary);">
+                        <i class="fa-solid fa-calendar-days" style="margin-right: 4px;"></i> Date Order
+                    </label>
+                    <select name="sortOrder" id="npSort" class="form-control" style="margin-bottom: 10px; font-size: 13px;">
+                        <option value="newest" @(ViewBag.SortOrder == "oldest" ? "" : "selected")>1. Newest to Oldest</option>
+                        <option value="oldest" @(ViewBag.SortOrder == "oldest" ? "selected" : "")>2. Oldest to Newest</option>
+                    </select>
+                    <label class="form-label" style="font-size: 11px; margin-bottom: 4px; color: var(--text-secondary);">Specific Created Date</label>
+                    <input type="date" name="date" id="npDate" value="@ViewBag.SelectedDate" class="form-control" style="font-size: 13px;" />
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 14px;">
+                    <button type="submit" class="btn-primary-gold" style="flex: 1; padding: 6px 0; font-size: 12px;" onclick="clearNPState()">
+                        <i class="fa-solid fa-check"></i> Apply
+                    </button>
+                    <a href="@Url.Action("NeedsPriority", "Support")" class="btn-secondary-gold"
+                       style="padding: 6px 12px; font-size: 12px; border-color: var(--border-subtle); color: var(--text-secondary);"
+                       onclick="clearNPState()">Reset</a>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary-gold" onclick="clearNPState()">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+        <a href="@Url.Action("NeedsPriority", "Support")" class="btn-secondary-gold"
+           style="border-color: var(--border-subtle); color: var(--text-secondary);" onclick="clearNPState()">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+        </a>
+    </form>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div id="npCardsWrapper">
+        @{ int npIdx = 0; }
+        @foreach (var item in Model)
+        {
+            <div class="np-card luxury-card" data-idx="@npIdx"
+                 style="padding: 20px; margin-bottom: 16px; display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="font-weight: 700; color: var(--text-primary); font-size: 16px; margin-bottom: 4px;">@item.Title</div>
+                    <div style="color: var(--text-secondary); font-size: 13px;">
+                        <span style="font-family: monospace; font-weight: 700; color: var(--accent-primary);">TICK-@item.TicketId.ToString("D4")</span>
+                        &bull; Employee: <strong>@item.RaisedByName</strong> &bull; @item.CreatedOn.ToString("MMM dd, yyyy hh:mm tt")
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    @using (Html.BeginForm("SetPriority", "Support", FormMethod.Post, new { style = "display: flex; gap: 10px; align-items: center;" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ticketId" value="@item.TicketId" />
+                        <select name="priorityId" class="form-control" style="width: auto; height: 38px; font-size: 13px; padding: 6px 12px;" required>
+                            <option value="">Set priority...</option>
+                            <option value="1">Low</option>
+                            <option value="2">Medium</option>
+                            <option value="3">High</option>
+                        </select>
+                        <button type="submit" class="btn-primary-gold"
+                                style="padding: 8px 16px; font-size: 12px; height: 38px; display: inline-flex; align-items: center; gap: 6px;"
+                                onclick="saveNPState()">
+                            <i class="fa-solid fa-layer-group"></i> SET &amp; MOVE TO BOARD
+                        </button>
+                    }
+                    <a href="@Url.Action("Details", "Support", new { id = item.TicketId })"
+                       class="btn-secondary-gold"
+                       style="padding: 8px 16px; font-size: 12px; height: 38px; display: inline-flex; align-items: center; gap: 6px;"
+                       onclick="saveNPState()">
+                        <i class="fa-solid fa-eye"></i> View
+                    </a>
+                </div>
+            </div>
+            npIdx++;
+        }
+    </div>
+
+    <div id="npPaginationBar" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; flex-wrap: wrap;"></div>
+    <div id="npPageInfo" style="text-align: center; font-size: 12px; color: var(--text-tertiary); margin-top: 8px;"></div>
+            }
+            else
+            {
+                <div class="luxury-card" style="padding: 48px; text-align: center; color: var(--text-secondary);">
+                    <i class="fa-solid fa-circle-check" style="font-size: 48px; color: var(--success); margin-bottom: 16px;"></i>
+                    <h3 style="color: var(--text-primary);">No tickets awaiting priority</h3>
+                    <p>All assigned complaints have priorities set. Check your active board for ongoing tickets.</p>
+                    <a href="@Url.Action("Board", "Support")" class="btn-primary-gold" style="margin-top: 12px; display: inline-flex;">Go to Ticket Board</a>
+                </div>
+            }
+
+@section scripts {
+    <script src="~/Content/RequiredJs/Support/NeedsPriority.js"></script>
+}

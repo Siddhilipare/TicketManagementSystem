@@ -1,0 +1,155 @@
+@model TicketModel.ViewModel.RegisterViewModel
+@{
+    ViewBag.Title = "Register - Simplify";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Create Account - Simplify Ticket System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            var saved = localStorage.getItem('theme-preference');
+            var system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            var theme = saved || system || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body style="background: var(--bg-primary); margin: 0; padding: 0;">
+
+    <!-- PRE-LOGIN HEADER -->
+    <header class="landing-header">
+        <a href="@Url.Action("Index", "Home")" class="app-brand">
+            <span class="logo-badge-sm">S</span> Simplify
+        </a>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme" title="Toggle Dark/Light Theme">
+                <i class="fa-solid fa-sun sun-icon"></i>
+                <i class="fa-solid fa-moon moon-icon"></i>
+            </button>
+            <a href="@Url.Action("Login", "Account")" class="landing-btn-ghost">Login</a>
+            <a href="@Url.Action("Register", "Account")" class="landing-btn-solid">Register</a>
+        </div>
+    </header>
+
+    <div class="landing-split auth-page-enter">
+        <!-- Left Decorative Brand Panel -->
+        <div class="landing-panel-left">
+            <div style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 12px; margin-bottom: 8px;">
+                <span style="font-size: 28px; font-weight: 800; color: #FFFFFF;">S</span>
+            </div>
+
+            <div style="font-size: 28px; font-weight: 700; color: #FFFFFF;">Simplify</div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.75); margin-bottom: 24px;">Enterprise complaint &amp; ticket resolution</div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; text-align: left;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85);">
+                    <i class="fa-solid fa-check" style="color: #FFFFFF;"></i> Instant Account Setup
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85);">
+                    <i class="fa-solid fa-check" style="color: #FFFFFF;"></i> Complaint Tracking &amp; History
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85);">
+                    <i class="fa-solid fa-check" style="color: #FFFFFF;"></i> Direct Support Communication
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="landing-panel-right" style="padding: 40px 48px; overflow-y: auto;">
+            <div class="auth-form-box" style="max-width: 440px;">
+                <h2 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Create Account</h2>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 24px;">Register to start raising and tracking complaints</div>
+
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "registerForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger small", style = "margin-bottom: 16px;" })
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Full Name <span style="font-size:11px;color:var(--text-tertiary);">(2–80 characters)</span></label>
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "John Doe", required = "required", id = "regUserName", data_max_length = "80", data_min_length = "2", data_field_label = "Full Name" })
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Email Address <span style="font-size:11px;color:var(--text-tertiary);">(max 150 characters)</span></label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "john@company.com", required = "required", id = "regEmail", data_max_length = "150", data_field_label = "Email Address" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <div style="display: flex; gap: 14px; margin-bottom: 16px;">
+                        <div style="flex: 1;">
+                            <label>Password <span style="font-size:11px;color:var(--text-tertiary);">(8–100 characters)</span></label>
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "••••••••", required = "required", id = "regPassword", data_max_length = "100", data_min_length = "8", data_field_label = "Password" })
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Confirm Password</label>
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "••••••••", required = "required", id = "regConfirmPassword", data_max_length = "100", data_field_label = "Confirm Password" })
+                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger small" })
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 14px; margin-bottom: 16px;">
+                        <div style="flex: 1;">
+                            <label>Age</label>
+                            @Html.TextBoxFor(m => m.Age, new { @class = "form-control", placeholder = "e.g. 28" })
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Gender</label>
+                            @Html.DropDownListFor(m => m.Gender,
+                                     new List<SelectListItem> {
+                                         new SelectListItem { Text = "Select Gender", Value = "" },
+                                         new SelectListItem { Text = "Male", Value = "M" },
+                                         new SelectListItem { Text = "Female", Value = "F" },
+                                         new SelectListItem { Text = "Other", Value = "Other" }
+                                     }, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Address <span style="font-size:11px;color:var(--text-tertiary);">(max 200 characters)</span></label>
+                        @Html.TextBoxFor(m => m.Address, new { @class = "form-control", placeholder = "Street address...", id = "regAddress", data_max_length = "200", data_field_label = "Address" })
+                        @Html.ValidationMessageFor(m => m.Address, "", new { @style = "color:var(--error);font-size:12px;" })
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label>City <span style="font-size:11px;color:var(--text-tertiary);">(max 100 characters)</span></label>
+                        @Html.TextBoxFor(m => m.City, new { @class = "form-control", placeholder = "City name...", id = "regCity", data_max_length = "100", data_field_label = "City" })
+                        @Html.ValidationMessageFor(m => m.City, "", new { @style = "color:var(--error);font-size:12px;" })
+                    </div>
+
+                    <button type="submit" class="auth-btn-submit">
+                        Create Account
+                    </button>
+                }
+
+                <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); font-size: 13px; color: var(--text-secondary);">
+                    Already have an account?
+                    <a href="@Url.Action("Login", "Account")" style="color: var(--accent-primary); font-weight: 600; text-decoration: none;">Sign In Here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE NAVIGATION OVERLAY -->
+    <div id="pageLoadingOverlay" class="loading-overlay">
+        <div class="spinner-ring"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/app-ui.js"></script>
+    <script src="~/Scripts/assistant-bot.js"></script>
+    <script src="~/Content/RequiredJs/Account/Register.js"></script>
+</body>
+</html>

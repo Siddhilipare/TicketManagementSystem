@@ -1,0 +1,4 @@
+http://localhost:52115/Account/GenerateHash?password=Siddhi@123
+
+Hash: tv5eSaELbQjGQb36z8kSC4qpHdek3c9WMY1dTjpF5U8=
+Salt: E9iaK3XRHWgkDZOWmIVScw==

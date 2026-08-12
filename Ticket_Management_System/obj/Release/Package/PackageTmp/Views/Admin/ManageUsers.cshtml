@@ -1,0 +1,278 @@
+@model IEnumerable<TicketModel.Models.UserListModel>
+@{
+    ViewBag.Title = "Manage Users";
+    ViewBag.ActiveTab = "AdminUsers";
+}
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <a href="@Url.Action("AllTickets", "Admin")" class="btn-secondary-gold" style="padding: 6px 14px; font-size: 12px; margin-bottom: 8px; display: inline-flex;">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <h2 class="luxury-heading" style="font-size: 28px; margin-top: 4px; margin-bottom: 0;">User Account Management</h2>
+    </div>
+    <button type="button" class="btn-primary-gold" data-toggle="modal" data-target="#addUserModal">
+        <i class="fa-solid fa-user-plus"></i> Add New Staff
+    </button>
+</div>
+
+<div class="luxury-table-wrapper">
+    @if (Model != null && Model.Any())
+    {
+        <table class="luxury-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>User Name</th>
+                    <th>Email Address</th>
+                    <th>System Role</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    string roleBadge = u.RoleName == "Administrator" ? "badge-role-admin"
+                                     : u.RoleName == "Support Executive" ? "badge-role-support" : "badge-role-user";
+
+                    <tr class="@(u.IsActive ? "" : "opacity-75")">
+                        <td style="font-weight: 700; color: var(--accent-primary); font-family: monospace;">USR-@u.UserId.ToString("D4")</td>
+                        <td style="font-weight: 600;">@(u.UserName ?? u.Email)</td>
+                        <td style="color: var(--text-secondary); font-size: 13px;">@u.Email</td>
+                        <td><span class="badge-pill-luxury @roleBadge">@u.RoleName</span></td>
+                        <td>
+                            @if (u.IsActive)
+                            {
+                                <span style="color: var(--success); font-weight: 700; font-size: 12px;"><i class="fa-solid fa-circle" style="font-size: 8px; margin-right: 4px;"></i> Active</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--error); font-weight: 700; font-size: 12px;"><i class="fa-solid fa-circle" style="font-size: 8px; margin-right: 4px;"></i> Inactive</span>
+                            }
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 8px;">
+                                <button type="button" class="btn-secondary-gold" style="padding: 6px 12px; font-size: 12px;" onclick="viewUser('@u.UserName', '@u.Email', '@u.RoleName')">
+                                    <i class="fa-solid fa-eye"></i> View
+                                </button>
+                                <a href="@Url.Action("EditUser", "Admin", new { id = u.UserId })" class="btn-secondary-gold" style="padding: 6px 12px; font-size: 12px;">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                                @if (u.IsActive)
+                                {
+                                    using (Html.BeginForm("ToggleUserActive", "Admin", FormMethod.Post, new { style = "display:inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@u.UserId" />
+                                        <input type="hidden" name="isActive" value="false" />
+                                        <button type="submit" class="btn-secondary-gold" style="padding: 6px 12px; font-size: 12px; border-color: var(--error); color: var(--error);" onclick="return confirm('Deactivate this user account?');">
+                                            <i class="fa-solid fa-user-slash"></i> Deactivate
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    using (Html.BeginForm("ToggleUserActive", "Admin", FormMethod.Post, new { style = "display:inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@u.UserId" />
+                                        <input type="hidden" name="isActive" value="true" />
+                                        <button type="submit" class="btn-secondary-gold" style="padding: 6px 12px; font-size: 12px; border-color: var(--success); color: var(--success);">
+                                            <i class="fa-solid fa-user-check"></i> Activate
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- ================= ADD NEW USER MODAL ================= -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle); padding: 20px 24px;">
+                <button type="button" class="close" data-dismiss="modal" style="color: var(--text-secondary); opacity: 1;">&times;</button>
+                <h4 class="modal-title luxury-heading" style="font-size: 22px; margin: 0;">Add New User / Staff</h4>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div id="addUserError" class="alert alert-danger" style="display:none;"></div>
+
+                <form id="addUserForm" autocomplete="off">
+                    <div class="form-group">
+                        <label class="form-label">Full Name <span style="font-size:11px;color:var(--text-tertiary);">(2-80 characters)</span></label>
+                        <input type="text" id="newUserName" name="newUserName" class="form-control" placeholder="e.g. Alexander Pierce"
+                               data-max-length="80" data-min-length="2" data-field-label="Full Name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address <span style="font-size:11px;color:var(--text-tertiary);">(max 150 characters)</span></label>
+                        <input type="email" id="newUserEmail" name="newUserEmail" class="form-control" placeholder="e.g. alex@company.com"
+                               data-max-length="150" data-field-label="Email Address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password <span style="font-size:11px;color:var(--text-tertiary);">(8-100 characters)</span></label>
+                        <input type="password" id="newUserPassword" name="newUserPassword" class="form-control" placeholder="Minimum 8 characters"
+                               data-max-length="100" data-min-length="8" data-field-label="Password" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assign Role</label>
+                        <select id="newUserRole" name="newUserRole" class="form-control">
+                            <option value="1">Administrator</option>
+                            <option value="2">Support Executive</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-subtle); padding: 16px 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn-secondary-gold" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-primary-gold" onclick="submitAddUser()">Create User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= VIEW USER MODAL ================= -->
+<div class="modal fade" id="viewUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle); padding: 20px 24px;">
+                <button type="button" class="close" data-dismiss="modal" style="color: var(--text-secondary); opacity: 1;">&times;</button>
+                <h4 class="modal-title luxury-heading" style="font-size: 22px; margin: 0;">User Account Profile</h4>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div style="margin-bottom: 16px;">
+                    <div class="accent-text">Full Name</div>
+                    <div id="viewUserName" style="font-size: 16px; font-weight: 700; color: var(--text-primary);"></div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div class="accent-text">Email Address</div>
+                    <div id="viewUserEmail" style="font-size: 14px; color: var(--text-secondary);"></div>
+                </div>
+                <div>
+                    <div class="accent-text">Assigned System Role</div>
+                    <div id="viewUserRole" style="font-size: 14px; color: var(--accent-primary); font-weight: 600;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <style>
+        #simplifyAssistantBot {
+            z-index: 99999 !important;
+        }
+
+        #simplifyBotTooltip {
+            z-index: 99999 !important;
+        }
+    </style>
+    <script>
+    var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+
+    $('#addUserModal').on('shown.bs.modal', function () {
+        if (window.AssistantBot) {
+            window.AssistantBot.init('#addUserForm');
+            // Focus first input so bot glides to it immediately
+            setTimeout(function () {
+                $('#newUserName').focus();
+            }, 100);
+        }
+    });
+
+    $('#addUserModal').on('hidden.bs.modal', function () {
+        // Hide bot when modal closes
+        var bot = document.getElementById('simplifyAssistantBot');
+        if (bot) { bot.style.opacity = '0'; bot.style.transform = 'scale(0)'; }
+    });
+
+        function viewUser(name, email, role) {
+        $('#viewUserName').text(name);
+        $('#viewUserEmail').text(email);
+        $('#viewUserRole').text(role);
+        $('#viewUserModal').modal('show');
+    }
+
+   function submitAddUser() {
+    $('#addUserError').hide().text('');
+
+    // This button is type="button" (it drives an AJAX call, not a real form
+    // submit), so the char-limit guard's own 'submit' listener never fires
+    // here — call it explicitly first. It blocks and clears only the
+    // over-limit field(s) itself when it returns false.
+    var addUserFormEl = document.getElementById('addUserForm');
+    if (window.AssistantBot && window.AssistantBot.CharLimitGuard &&
+        !window.AssistantBot.CharLimitGuard.validateForm(addUserFormEl)) {
+        return;
+    }
+
+    var name     = $('#newUserName').val().trim();
+    var email    = $('#newUserEmail').val().trim();
+    var password = $('#newUserPassword').val();
+    var role     = $('#newUserRole').val();
+
+    // --- Client-side validation ---
+    if (!name) {
+        $('#addUserError').text('Full name is required.').show(); return;
+    }
+    if (name.length < 2 || name.length > 80) {
+        $('#addUserError').text('Name must be between 2 and 80 characters.').show(); return;
+    }
+    if (!/^[a-zA-Z\s\-']+$/.test(name)) {
+        $('#addUserError').text('Name can only contain letters, spaces, hyphens, or apostrophes.').show(); return;
+    }
+    if (!email) {
+        $('#addUserError').text('Email address is required.').show(); return;
+    }
+   var atSign = String.fromCharCode(64);
+
+    if (!password) {
+        $('#addUserError').text('Password is required.').show(); return;
+    }
+    if (password.length < 8) {
+        $('#addUserError').text('Password must be at least 8 characters.').show(); return;
+    }
+    if (!/[A-Z]/.test(password)) {
+        $('#addUserError').text('Password must contain at least one uppercase letter.').show(); return;
+    }
+    if (!/[a-z]/.test(password)) {
+        $('#addUserError').text('Password must contain at least one lowercase letter.').show(); return;
+    }
+    if (!/[0-9]/.test(password)) {
+        $('#addUserError').text('Password must contain at least one number.').show(); return;
+    }
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+        $('#addUserError').text('Password must contain at least one special character.').show(); return;
+    }
+
+    $.ajax({
+        url: '@Url.Action("AddStaffUser", "Admin")',
+        type: 'POST',
+        data: {
+            UserName: name,
+            Email: email,
+            Password: password,
+            RoleId: role,
+            __RequestVerificationToken: antiForgeryToken
+        },
+        success: function (res) {
+            if (res.success) {
+                location.reload();
+            } else {
+                $('#addUserError').text(res.message).show();
+            }
+        },
+        error: function () {
+            $('#addUserError').text('Something went wrong. Please try again.').show();
+        }
+    });
+}
+    </script>
+}
+
+@Html.AntiForgeryToken()

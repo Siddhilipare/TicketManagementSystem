@@ -1,0 +1,577 @@
+﻿@using System
+@using System.Linq
+@using System.Collections.Generic
+
+@{
+    HttpCookie accessCookie = Request.Cookies["access_token"];
+    bool isLoggedIn = accessCookie != null && !string.IsNullOrEmpty(accessCookie.Value);
+    string userRole = isLoggedIn && User.Identity.IsAuthenticated
+        ? (User.IsInRole("Administrator") ? "Administrator"
+           : User.IsInRole("Support Executive") ? "Support Executive"
+           : "Employee")
+        : null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Simplify Ticket System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            var saved = localStorage.getItem('theme-preference');
+            var system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            var theme = saved || system || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="@(isLoggedIn ? "app-shell" : "landing-shell")">
+
+    @if (!isLoggedIn)
+    {
+        <!-- ===================== PRE-LOGIN HEADER ===================== -->
+        <header class="landing-header">
+            <a href="@Url.Action("Index", "Home")" class="app-brand">
+                <span class="logo-badge-sm">S</span> Simplify
+            </a>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme" title="Toggle Dark/Light Theme">
+                    <i class="fa-solid fa-sun sun-icon"></i>
+                    <i class="fa-solid fa-moon moon-icon"></i>
+                </button>
+                @Html.ActionLink("Login", "Login", "Account", null, new { @class = "btn-secondary-gold" })
+                @Html.ActionLink("Register", "Register", "Account", null, new { @class = "btn-primary-gold" })
+            </div>
+        </header>
+
+        <main class="auth-container">
+            @RenderBody()
+        </main>
+    }
+    else
+    {
+        <!-- ===================== POST-LOGIN SHELL ===================== -->
+        <header class="app-topbar">
+            <div class="topbar-left">
+                <button id="sidebarToggleBtn" class="icon-btn" aria-label="Toggle menu" title="Toggle Sidebar Navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <a href="@Url.Action("Index", "Home")" class="app-brand">
+                    <span class="logo-badge-sm">S</span> Simplify
+                </a>
+            </div>
+
+            @{
+                System.Security.Claims.Claim emailClaim = null;
+                System.Security.Claims.Claim subClaim = null;
+                try
+                {
+                    var cp = User as System.Security.Claims.ClaimsPrincipal;
+                    if (cp != null)
+                    {
+                        emailClaim = cp.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email);
+                        subClaim = cp.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+                    }
+                }
+                catch { }
+
+                int currentUid = 0;
+                if (subClaim != null && !string.IsNullOrEmpty(subClaim.Value))
+                {
+                    int.TryParse(subClaim.Value, out currentUid);
+                }
+
+                int unreadCount = 0;
+                var notifications = new List<TicketDAL.Dal.NotificationItem>();
+                if (isLoggedIn && currentUid > 0)
+                {
+                    try
+                    {
+                        var notifyDAL = new TicketDAL.Dal.NotificationDataAccess();
+                        unreadCount = notifyDAL.GetUnreadCount(currentUid);
+                        notifications = notifyDAL.GetByUser(currentUid) ?? new List<TicketDAL.Dal.NotificationItem>();
+                    }
+                    catch { }
+                }
+
+                string displayInitial = "U";
+                if (emailClaim != null && !string.IsNullOrEmpty(emailClaim.Value))
+                {
+                    displayInitial = emailClaim.Value.Substring(0, 1).ToUpper();
+                }
+            }
+            <div class="topbar-right">
+
+                <!-- Contact Button -->
+                <button type="button" data-toggle="modal" data-target="#contactModal"
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-primary);cursor:pointer;margin-right:4px;"
+                        onmouseover="this.style.borderColor='var(--accent-primary)';this.style.color='var(--accent-primary)'"
+                        onmouseout="this.style.borderColor='var(--border-subtle)';this.style.color='var(--text-primary)'">
+                    <i class="fa-solid fa-phone" style="font-size:11px;"></i>&nbsp;Contact
+                </button>
+
+                <!-- About Us Button -->
+                <button type="button" data-toggle="modal" data-target="#aboutModal"
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-primary);cursor:pointer;margin-right:8px;"
+                        onmouseover="this.style.borderColor='var(--accent-primary)';this.style.color='var(--accent-primary)'"
+                        onmouseout="this.style.borderColor='var(--border-subtle)';this.style.color='var(--text-primary)'">
+                    <i class="fa-solid fa-circle-info" style="font-size:11px;"></i>&nbsp;About
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme" title="Toggle Dark/Light Theme">
+                    <i class="fa-solid fa-sun sun-icon"></i>
+                    <i class="fa-solid fa-moon moon-icon"></i>
+                </button>
+
+                <!-- Notifications Bell Dropdown -->
+                <div class="dropdown">
+                    <button class="icon-btn" data-toggle="dropdown" aria-label="Notifications" style="position:relative;">
+                        <i class="fa-regular fa-bell"></i>
+                        @if (unreadCount > 0)
+                        {
+                            <span class="notif-badge">@unreadCount</span>
+                        }
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right notif-dropdown">
+                        @if (notifications != null && notifications.Any())
+                        {
+                            var topNotifications = notifications.Take(5);
+                            foreach (var n in topNotifications)
+                            {
+                                string safeMsg = (n.Message ?? "").Replace("'", "\\'").Replace("\r\n", " ").Replace("\n", " ");
+                                <li class="notif-item @(n.IsRead ? "read" : "unread")"
+                                    data-notif-id="@n.Id"
+                                    onclick="openNotificationModal(@n.Id, '@safeMsg', '@n.CreatedOn.ToString("MMM dd, hh:mm tt")'); event.stopPropagation();">
+                                    <div style="display:flex; align-items:flex-start; gap:10px;">
+                                        @if (!n.IsRead)
+                                        {
+                                            <span style="width:8px; height:8px; border-radius:50%; background:var(--accent-primary); margin-top:5px; flex-shrink:0; display:inline-block;"></span>
+                                        }
+                                        <div style="flex:1;">
+                                            <div class="notif-msg">@n.Message</div>
+                                            <div class="notif-time">@n.CreatedOn.ToString("MMM dd, hh:mm tt")</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                            if (notifications.Count() > 5)
+                            {
+                                <li class="notif-view-all">
+                                    <a href="@Url.Action("Index", "Notification")">View All Notifications (@notifications.Count())</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="notif-empty">No notifications</li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div class="dropdown">
+                    <button class="user-avatar-btn" data-toggle="dropdown" title="User Menu">@displayInitial</button>
+                    <ul class="dropdown-menu dropdown-menu-right" style="min-width: 220px; padding: 14px; background: var(--bg-secondary); border: 1.5px solid var(--accent-primary); box-shadow: var(--shadow-lg); border-radius: 10px; margin-top: 8px; right: 0; left: auto; z-index: 1050;">
+                        <li class="dropdown-header" style="padding: 4px 8px 10px 8px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 10px;">
+                            <strong style="color: var(--text-primary); font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@User.Identity.Name</strong>
+                            <div class="accent-text" style="font-size: 11px; font-weight: 600; margin-top: 2px;">@userRole</div>
+                        </li>
+                        <li style="padding: 4px 0; margin-bottom: 8px;">
+                            <a href="@Url.Action("Index", "MyAccount")"
+                               style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 13px; border-radius: 6px; font-weight: 600; color: var(--text-primary); text-decoration: none; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); transition: border-color .2s;"
+                               onmouseover="this.style.borderColor='var(--accent-primary)'"
+                               onmouseout="this.style.borderColor='var(--border-subtle)'">
+                                <i class="fa-solid fa-circle-user" style="color: var(--accent-primary); font-size: 15px;"></i> My Account
+                            </a>
+                        </li>
+                        <li style="padding: 4px 0;">
+                            @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-primary-gold" style="width: 100%; justify-content: center; padding: 10px 14px; font-size: 13px; border-radius: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                                </button>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <!-- ===================== ROLLS-ROYCE VERTICAL SIDEBAR ===================== -->
+            <aside id="appSidebar" class="app-sidebar">
+                <div>
+                    @if (userRole == "Employee")
+                    {
+                        <div class="sidebar-section-label">Workspace</div>
+                        <nav class="sidebar-nav">
+                            <a href="@Url.Action("Index", "Ticket")" class="sidebar-link @(ViewBag.ActiveTab == "Tickets" ? "active" : "")">
+                                <i class="fa-solid fa-list-check"></i> <span>My Complaints</span>
+                            </a>
+                            <a href="@Url.Action("Create", "Ticket")" class="sidebar-link @(ViewBag.ActiveTab == "Create" ? "active" : "")">
+                                <i class="fa-solid fa-circle-plus"></i> <span>Raise Complaint</span>
+                            </a>
+                        </nav>
+                    }
+                    else if (userRole == "Support Executive")
+                    {
+                        <div class="sidebar-section-label">Support Board</div>
+                        <nav class="sidebar-nav">
+                            <a href="@Url.Action("Index", "Support")" class="sidebar-link @(ViewBag.ActiveTab == "SupportDashboard" ? "active" : "")">
+                                <i class="fa-solid fa-bars-staggered"></i> <span>Dashboard</span>
+                            </a>
+                            <a href="@Url.Action("Board", "Support")" class="sidebar-link @(ViewBag.ActiveTab == "SupportBoard" ? "active" : "")">
+                                <i class="fa-solid fa-ticket"></i> <span>Ticket Board</span>
+                            </a>
+                            <a href="@Url.Action("MyComplaints", "Support")" class="sidebar-link @(ViewBag.ActiveTab == "SupportMyComplaints" ? "active" : "")">
+                                <i class="fa-solid fa-list-check"></i> <span>My Complaints</span>
+                            </a>
+                            <a href="@Url.Action("CreateTicket", "Support")" class="sidebar-link @(ViewBag.ActiveTab == "SupportCreateTicket" ? "active" : "")">
+                                <i class="fa-solid fa-circle-plus"></i> <span>Raise Complaint</span>
+                            </a>
+                        </nav>
+                    }
+                    else if (userRole == "Administrator")
+                    {
+                        <div class="sidebar-section-label">Management</div>
+                        <nav class="sidebar-nav">
+                            <a href="@Url.Action("Dashboard", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminDashboard" ? "active" : "")">
+                                <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+                            </a>
+                            <a href="@Url.Action("ManageUsers", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminUsers" ? "active" : "")">
+                                <i class="fa-solid fa-users-gear"></i> <span>Manage Staff</span>
+                            </a>
+                            <a href="@Url.Action("ManageEmployees", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminEmployees" ? "active" : "")">
+                                <i class="fa-solid fa-user-tie"></i> <span>Manage Employee</span>
+                            </a>
+                            <a href="@Url.Action("AllTickets", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminTickets" ? "active" : "")">
+                                <i class="fa-solid fa-ticket"></i> <span>All Tickets</span>
+                            </a>
+                            <a href="@Url.Action("MyComplaints", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminMyComplaints" ? "active" : "")">
+                                <i class="fa-solid fa-list-check"></i> <span>My Complaints</span>
+                            </a>
+                            <a href="@Url.Action("CreateTicket", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminCreateTicket" ? "active" : "")">
+                                <i class="fa-solid fa-circle-plus"></i> <span>Raise Complaint</span>
+                            </a>
+                        </nav>
+                    }
+                    <div class="sidebar-section-label" style="margin-top:20px;">Notifications</div>
+                    <a href="@Url.Action("Index", "Notification")" class="sidebar-link @(ViewBag.ActiveTab == "Notifications" ? "active" : "")">
+                        <i class="fa-solid fa-bell"></i> <span>Notification History</span>
+                    </a>
+                    <div class="sidebar-section-label" style="margin-top:20px;">Account</div>
+                    <a href="@Url.Action("Index", "MyAccount")" class="sidebar-link @(ViewBag.ActiveTab == "MyAccount" ? "active" : "")">
+                        <i class="fa-solid fa-circle-user"></i> <span>My Account</span>
+                    </a>
+                </div>
+
+                <!-- Hovering Assistant Bot Widget placed at Bottom of Sidebar -->
+                <div class="sidebar-bot-container" title="Simplify Assistant Companion">
+                    <div class="sidebar-bot-tooltip">Simplify Companion</div>
+                    <div class="bot-character bot-sidebar-avatar">
+                        <div class="bot-antenna"><div class="bot-antenna-ball"></div></div>
+                        <div class="bot-head">
+                            <div class="bot-face">
+                                <div class="bot-eye bot-eye-left"><div class="bot-pupil"></div></div>
+                                <div class="bot-eye bot-eye-right"><div class="bot-pupil"></div></div>
+                                <div class="bot-mouth"></div>
+                            </div>
+                        </div>
+                        <div class="bot-body-badge">S</div>
+                    </div>
+                    <div class="sidebar-bot-info">
+                        <div class="sidebar-bot-title">Simplify Assistant</div>
+                        <div class="sidebar-bot-status"><span class="bot-status-dot"></span> Active &amp; Ready</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ===================== MAIN CONTENT ===================== -->
+            <main class="app-main">
+                @RenderBody()
+            </main>
+        </div>
+                }
+
+    <!-- 2-SECOND PAGE NAVIGATION LOADING OVERLAY -->
+    <div id="pageLoadingOverlay" class="loading-overlay">
+        <div class="spinner-ring"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- CONSOLIDATED TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- NOTIFICATION MODALS -->
+    <div class="modal fade" id="notificationDetailModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content notif-detail-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Notification</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p id="notificationDetailMessage" style="font-size:14px;line-height:1.6;color:#172b4d;word-break:break-word;"></p>
+                    <small class="text-muted" id="notificationDetailTime"></small>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="notificationHistoryModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Notification History</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body" style="padding:0;">
+                    <div id="notificationHistoryList" style="max-height:500px;overflow-y:auto;">
+                        <div class="text-center text-muted" style="padding:20px;">Loading...</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/app-ui.js"></script>
+    <script src="~/Scripts/assistant-bot.js"></script>
+    <script>
+        $(document).on('click', '.filter-dropdown-panel', function (e) { e.stopPropagation(); });
+
+        function openNotificationModal(notifId, message, time) {
+            document.getElementById('notificationDetailMessage').textContent = message;
+            document.getElementById('notificationDetailTime').textContent = time;
+            $('#notificationDetailModal').modal('show');
+            markNotificationAsRead(notifId);
+        }
+
+        function markNotificationAsRead(notifId) {
+            $.ajax({
+                type: 'POST',
+                url: '/Notification/MarkAsRead',
+                data: { id: notifId },
+                success: function (response) {
+                    if (response.success) {
+                        var item = document.querySelector('[data-notif-id="' + notifId + '"]');
+                        if (item) {
+                            item.classList.remove('unread');
+                            item.classList.add('read');
+                        }
+                        var badge = document.querySelector('.notif-badge');
+                        if (badge) {
+                            var count = parseInt(badge.textContent) - 1;
+                            if (count > 0) { badge.textContent = count; }
+                            else { badge.remove(); }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadNotificationHistory() {
+            $.ajax({
+                type: 'GET',
+                url: '/Notification/GetAll',
+                success: function (response) {
+                    var list = document.getElementById('notificationHistoryList');
+                    list.innerHTML = '';
+                    if (response.notifications && response.notifications.length > 0) {
+                        response.notifications.forEach(function (n) {
+                            var el = document.createElement('div');
+                            el.className = 'notif-history-item ' + (n.isRead ? 'read' : 'unread');
+                            el.innerHTML =
+                                '<div style="display:flex; align-items:flex-start; gap:10px;">' +
+                                (n.isRead ? '' : '<span style="width:8px; height:8px; border-radius:50%; background:var(--accent-primary); margin-top:5px; flex-shrink:0; display:inline-block;"></span>') +
+                                '<div style="flex:1;">' +
+                                '<div class="notif-history-message">' + n.message + '</div>' +
+                                '<div class="notif-history-time">' + n.createdOn + '</div>' +
+                                '</div>' +
+                                '</div>';
+                            el.onclick = function () { openNotificationModal(n.id, n.message, n.createdOn); };
+                            list.appendChild(el);
+                        });
+                    } else {
+                        list.innerHTML = '<div class="text-center text-muted" style="padding:24px;">No notifications</div>';
+                    }
+                }
+            });
+        }
+
+   $('#notificationHistoryModal').on('show.bs.modal', function () { loadNotificationHistory(); });
+
+        // ── Live notification polling — updates bell badge every 30 seconds ──
+        function pollNotifications() {
+            $.ajax({
+                type: 'GET',
+                url: '/Notification/GetAll',
+                success: function (response) {
+                    if (!response || !response.notifications) return;
+                    var unread = response.notifications.filter(function (n) { return !n.isRead; }).length;
+                    var badge = document.querySelector('.notif-badge');
+                    if (unread > 0) {
+                        if (badge) {
+                            badge.textContent = unread;
+                        } else {
+                            var bell = document.querySelector('[aria-label="Notifications"]');
+                            if (bell) {
+                                var nb = document.createElement('span');
+                                nb.className = 'notif-badge';
+                                nb.textContent = unread;
+                                bell.appendChild(nb);
+                            }
+                        }
+                    } else {
+                        if (badge) badge.remove();
+                    }
+                }
+            });
+        }
+        // Poll on load and every 30 seconds
+        @if (isLoggedIn) {
+            <text>
+        $(document).ready(function () { pollNotifications(); });
+        setInterval(pollNotifications, 30000);
+            </text>
+        }
+
+        @{
+            string toastSuccess = TempData["SuccessMessage"] != null ? TempData["SuccessMessage"].ToString() : null;
+            string toastError = TempData["ErrorMessage"] != null ? TempData["ErrorMessage"].ToString() : null;
+        }
+        $(document).ready(function () {
+            @if (toastSuccess != null)
+            {
+                <text>LuxuryUI.showToast('success', 'Success', '@Html.Raw(HttpUtility.JavaScriptStringEncode(toastSuccess))');</text>
+            }
+            @if (toastError != null)
+            {
+                <text>LuxuryUI.showToast('error', 'Error', '@Html.Raw(HttpUtility.JavaScriptStringEncode(toastError))');</text>
+            }
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+
+    <!-- ====== CONTACT MODAL ====== -->
+    <div class="modal fade" id="contactModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+            <div class="modal-content luxury-card" style="border-radius:14px;overflow:hidden;border:1.5px solid var(--border-subtle);">
+                <div style="background:var(--accent-primary);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <i class="fa-solid fa-headset" style="font-size:22px;color:#fff;"></i>
+                        <div>
+                            <div style="font-weight:700;font-size:16px;color:#fff;">Contact Us</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,.8);">We're here to help</div>
+                        </div>
+                    </div>
+                    <button type="button" data-dismiss="modal" style="color:#fff;font-size:22px;background:none;border:none;cursor:pointer;">&times;</button>
+                </div>
+                <div style="padding:24px;display:flex;flex-direction:column;gap:14px;">
+                    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border-subtle);">
+                        <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa-solid fa-phone" style="color:#fff;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;">Phone Support</div>
+                            <div style="font-weight:700;font-size:15px;color:var(--text-primary);">+91 98234 56789</div>
+                            <div style="font-size:12px;color:var(--text-secondary);">Mon – Fri, 9 AM – 6 PM</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border-subtle);">
+                        <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa-solid fa-envelope" style="color:#fff;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;">Email Support</div>
+                            <div style="font-weight:700;font-size:15px;color:var(--text-primary);">support@simplify.in</div>
+                            <div style="font-size:12px;color:var(--text-secondary);">We reply within 24 hours</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-tertiary);border-radius:10px;border:1px solid var(--border-subtle);">
+                        <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa-solid fa-location-dot" style="color:#fff;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;">Office</div>
+                            <div style="font-weight:700;font-size:15px;color:var(--text-primary);">Simplify Technologies Pvt. Ltd.</div>
+                            <div style="font-size:12px;color:var(--text-secondary);">4th Floor, Tech Park, Baner, Pune – 411045</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:0 24px 20px;text-align:right;">
+                    <button type="button" class="btn-secondary-gold" data-dismiss="modal" style="padding:8px 20px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== ABOUT US MODAL ====== -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:540px;">
+            <div class="modal-content luxury-card" style="border-radius:14px;overflow:hidden;border:1.5px solid var(--border-subtle);">
+                <div style="background:var(--accent-primary);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;">S</div>
+                        <div>
+                            <div style="font-weight:700;font-size:16px;color:#fff;">About Simplify</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,.8);">Making work easier, one ticket at a time</div>
+                        </div>
+                    </div>
+                    <button type="button" data-dismiss="modal" style="color:#fff;font-size:22px;background:none;border:none;cursor:pointer;">&times;</button>
+                </div>
+                <div style="padding:28px 24px;">
+                    <p style="font-size:15px;line-height:1.8;color:var(--text-primary);margin-bottom:18px;">
+                        At <strong>Simplify</strong>, we believe that getting help at your workplace should never feel complicated.
+                        Whether your laptop is acting up, the internet is slow, a printer refuses to cooperate, or anything else
+                        is blocking your day — Simplify gives you a quick and easy way to raise your concern and get it resolved.
+                    </p>
+                    <p style="font-size:14px;line-height:1.8;color:var(--text-secondary);margin-bottom:20px;">
+                        Just <strong>describe your problem</strong> in a few words and submit it. The right support person is
+                        automatically assigned, you receive a notification the moment there is an update, and you can check the
+                        progress of your request anytime from your personal dashboard. No follow-up calls. No waiting in the dark.
+                    </p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+                        <div style="background:var(--bg-tertiary);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);text-align:center;">
+                            <div style="font-size:24px;font-weight:800;color:var(--accent-primary);">3</div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Simple steps to raise a complaint</div>
+                        </div>
+                        <div style="background:var(--bg-tertiary);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);text-align:center;">
+                            <div style="font-size:24px;font-weight:800;color:var(--accent-primary);">24 / 7</div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Track your ticket anytime</div>
+                        </div>
+                        <div style="background:var(--bg-tertiary);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);text-align:center;">
+                            <div style="font-size:24px;font-weight:800;color:var(--accent-primary);">100%</div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Transparent — see every update</div>
+                        </div>
+                        <div style="background:var(--bg-tertiary);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);text-align:center;">
+                            <div style="font-size:24px;font-weight:800;color:var(--accent-primary);">&#128276;</div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Instant notification on every step</div>
+                        </div>
+                    </div>
+                    <div style="font-size:13px;line-height:1.7;color:var(--text-secondary);padding:14px 16px;background:var(--bg-tertiary);border-radius:10px;border-left:3px solid var(--accent-primary);">
+                        Simplify keeps you, your support team, and management all on the same page — so nothing slips through
+                        the cracks and every problem gets the attention it deserves.
+                    </div>
+                </div>
+                <div style="padding:0 24px 20px;text-align:right;">
+                    <button type="button" class="btn-secondary-gold" data-dismiss="modal" style="padding:8px 20px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

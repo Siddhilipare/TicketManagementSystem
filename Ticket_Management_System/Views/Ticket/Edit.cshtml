@@ -1,0 +1,97 @@
+@model TicketModel.ViewModels.EditTicketViewModel
+@using System.Linq
+@{
+    ViewBag.Title = "Edit Complaint";
+    ViewBag.ActiveTab = "Tickets";
+    var existingAttachments = ViewBag.Attachments as List<TicketModel.Models.TicketAttachmentModel>;
+}
+
+<div style="margin-bottom: 20px;">
+    <a href="@Url.Action("Index", "Ticket")" class="back-link-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to My Complaints
+    </a>
+</div>
+
+<div class="luxury-card" style="max-width: 800px; margin: 0 auto; padding: 40px;">
+    <div style="margin-bottom: 28px;">
+        <div class="accent-text">Complaint Edit</div>
+        <h2 class="luxury-heading" style="font-size: 26px; margin-top: 4px; margin-bottom: 0;">Edit Complaint Details</h2>
+    </div>
+
+    @if (existingAttachments != null && existingAttachments.Any())
+    {
+        <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label">Existing Attachments</label>
+            <div class="attachment-grid">
+                @foreach (var a in existingAttachments)
+                {
+                    string ext = System.IO.Path.GetExtension(a.FilePath).TrimStart('.').ToLower();
+                    bool isImage = ext == "jpg" || ext == "jpeg" || ext == "png" || ext == "gif" || ext == "bmp";
+                    string iconClass = ext == "pdf" ? "fa-file-pdf" : (ext == "doc" || ext == "docx") ? "fa-file-word" : ext == "txt" ? "fa-file-lines" : "fa-file";
+                    string fileName = System.IO.Path.GetFileName(a.FilePath);
+
+                    <div class="attachment-card" title="@fileName">
+                        @if (isImage)
+                        {
+                            <a href="@a.FilePath" target="_blank" style="width: 100%; height: 100%;">
+                                <img src="@a.FilePath" alt="@fileName" />
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@a.FilePath" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; width: 100%; height: 100%; padding: 8px;">
+                                <i class="fa-solid @iconClass file-icon"></i>
+                                <span class="file-name">@fileName</span>
+                            </a>
+                        }
+
+                        @using (Html.BeginForm("DeleteAttachment", "Ticket", FormMethod.Post, new { style = "position: absolute; top: 4px; right: 4px;" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="attachmentId" value="@a.TicketAttachmentId" />
+                            <input type="hidden" name="ticketId" value="@Model.TicketId" />
+                            <button type="submit" class="remove-btn" onclick="return confirm('Remove this attachment?');" title="Remove Attachment">&times;</button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @using (Html.BeginForm("Edit", "Ticket", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.TicketId)
+       @Html.ValidationSummary(false, "", new { @class = "alert alert-danger", style = "margin-bottom:16px; display:block;" })
+
+        <div class="form-group">
+            <label class="form-label">Title</label>
+            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Brief title of your complaint", required = "required" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "5", placeholder = "Describe your issue in detail...", required = "required" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Add More Attachments (Optional)</label>
+            <input type="file" name="Attachments" multiple class="form-control"
+                   data-existing-count="@(existingAttachments != null ? existingAttachments.Count : 0)"
+                   accept=".jpg,.jpeg,.png,.gif,.bmp,.pdf,.txt,.doc,.docx"
+                   onchange="validateFiles(this)" />
+            <span id="fileError" style="color:red; font-size:13px; display:none;"></span>
+        </div>
+
+        <div style="display: flex; gap: 14px; margin-top: 32px;">
+            <button type="submit" class="btn-primary-gold" style="flex: 1;">
+                <i class="fa-solid fa-floppy-disk"></i> Save Changes
+            </button>
+            <a href="@Url.Action("Index", "Ticket")" class="btn-secondary-gold">Cancel</a>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script src="~/Content/RequiredJs/Ticket/Edit.js"></script>
+}

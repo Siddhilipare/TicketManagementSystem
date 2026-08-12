@@ -1,0 +1,38 @@
+home->index
+
+@{
+    ViewBag.Title = "Home";
+}
+
+<div class="site-blocks-cover">
+    <div class="site-blocks-cover bg-dark">
+
+        <div class="container">
+
+            <div class="row">
+
+                <div class="col-lg-7 mx-auto order-lg-2 align-self-center">
+
+                    <div class="site-block-cover-content text-center">
+
+                        <h2 class="sub-title text-white">
+                            Premium Movie Experience
+                        </h2>
+
+                        <h1 class="text-white">
+                            Welcome To CineLux
+                        </h1>
+
+                       
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

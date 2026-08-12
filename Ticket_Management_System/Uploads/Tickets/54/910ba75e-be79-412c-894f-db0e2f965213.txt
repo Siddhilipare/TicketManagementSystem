@@ -1,0 +1,364 @@
+Layout.css
+
+/* ===========================
+   PREMIUM CINELUX TOASTR
+=========================== */
+
+#toast-container{
+    z-index:999999 !important;
+}
+
+#toast-container>.toast{
+    width:380px;
+    min-height:72px;
+    padding:18px 20px 18px 24px;
+    border-radius:16px;
+    border:1px solid rgba(230,190,70,.45);
+    background:linear-gradient(135deg,#0d2218 0%,#163628 55%,#1d4634 100%) !important;
+    color:#f8f2d8 !important;
+    opacity:1 !important;
+    box-shadow:
+        0 0 0 1px rgba(255,210,80,.15),
+        0 12px 35px rgba(0,0,0,.45),
+        0 0 22px rgba(218,165,32,.25);
+    font-family:'Poppins',sans-serif;
+}
+
+#toast-container .toast-title{
+    color:#ffd86a !important;
+    font-family:'Cinzel',serif;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+}
+
+#toast-container .toast-message{
+    color:#fff8e5 !important;
+    font-size:15px;
+    font-weight:500;
+    line-height:1.5;
+}
+
+#toast-container>.toast-success{
+    border-left:6px solid #43c46b;
+}
+
+#toast-container>.toast-error{
+    border-left:6px solid #d9534f;
+}
+
+#toast-container>.toast-warning{
+    border-left:6px solid #f0ad4e;
+}
+
+#toast-container>.toast-info{
+    border-left:6px solid #d4af37;
+}
+
+#toast-container .toast-close-button{
+    color:#ffe58a !important;
+    opacity:1 !important;
+    font-size:20px;
+}
+
+#toast-container .toast-close-button:hover{
+    color:#ffffff !important;
+}
+
+/* ==========================================
+   CINELUX NAVBAR SPACING
+========================================== */
+
+.site-navbar .container{
+    max-width:1400px;
+}
+
+.site-navbar .d-flex{
+    gap:30px;
+}
+
+.main-nav{
+    flex:1;
+    display:flex;
+    justify-content:center;
+}
+
+.site-menu{
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin:0;
+    padding:0;
+}
+
+.site-menu > li{
+    margin:0 !important;
+    padding:0 !important;
+    list-style:none;
+}
+
+.site-menu > li > a{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:10px 14px !important;
+    white-space:nowrap;
+}
+
+.desktop-auth{
+    margin-left:25px;
+    white-space:nowrap;
+}
+
+/* ===========================
+      PREMIUM NAVBAR
+=========================== */
+
+.logo{
+    min-width:250px;
+}
+
+.main-nav{
+    display:flex;
+    justify-content:flex-start;
+    flex:1;
+    margin-left:35px;
+}
+
+.site-menu{
+    display:flex !important;
+    align-items:center;
+    gap:28px;
+}
+
+.site-menu li{
+    margin:0;
+}
+
+.desktop-auth{
+
+    min-width:240px;
+
+    display:flex;
+
+    justify-content:flex-end;
+
+}
+
+/* ===========================
+      USER MENU
+=========================== */
+
+.premium-user{
+
+    color:#d8b24b !important;
+
+    font-weight:600;
+
+    display:flex !important;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.premium-user:hover{
+
+    color:#ffe27a !important;
+
+}
+
+.premium-dropdown{
+
+    min-width:240px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#112d20;
+
+    padding:10px 0;
+
+    margin-top:15px;
+
+    box-shadow:0 20px 40px rgba(0,0,0,.45);
+
+}
+
+.premium-dropdown li a{
+
+    color:#f4f1dc;
+
+    padding:12px 22px;
+
+    display:block;
+
+    transition:.25s;
+
+}
+
+.premium-dropdown li a:hover{
+
+    background:#1b4735;
+
+    color:#ffd86a;
+
+}
+
+.dropdown-header{
+
+    color:#d4af37;
+
+    font-family:'Cinzel';
+
+    font-size:16px;
+
+    padding:14px 22px;
+
+}
+
+.divider{
+
+    margin:8px 0;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+/* ===========================
+      USER MENU
+=========================== */
+
+.premium-user{
+    color:#D4AF37 !important;
+    font-weight:600;
+    display:flex !important;
+    align-items:center;
+    gap:8px;
+    transition:.3s;
+}
+
+.premium-user:hover{
+    color:#FFD86A !important;
+    text-decoration:none;
+}
+
+.premium-dropdown{
+    min-width:240px;
+    border:none;
+    border-radius:14px;
+    background:#112d20;
+    padding:10px 0;
+    margin-top:15px;
+    box-shadow:0 20px 40px rgba(0,0,0,.45);
+}
+
+/* Dropdown Heading (Hello Siddhi) */
+.premium-dropdown .dropdown-header{
+    color:#D4AF37 !important;
+    font-family:'Cinzel', serif;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding:14px 22px;
+    border-bottom:1px solid rgba(212,175,55,.20);
+}
+
+/* All menu links */
+.premium-dropdown li a{
+    color:#D4AF37 !important;
+    padding:12px 22px;
+    display:block;
+    transition:.25s;
+    text-decoration:none;
+}
+
+/* Hover */
+.premium-dropdown li a:hover{
+    background:#1b4735;
+    color:#FFD86A !important;
+    padding-left:28px;
+}
+
+/* Logout */
+.premium-dropdown li:last-child a{
+    color:#D4AF37 !important;
+    font-weight:600;
+}
+
+.premium-dropdown li:last-child a:hover{
+    color:#FFD86A !important;
+}
+
+/* Divider */
+.divider{
+    margin:8px 0;
+    border-top:1px solid rgba(212,175,55,.25);
+}
+
+/* ===========================
+   AUTH BUTTONS
+=========================== */
+
+.desktop-auth{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    min-width:220px;
+}
+
+.auth-links{
+    display:flex !important;
+    align-items:center;
+    gap:14px;
+    margin:0;
+    padding:0;
+}
+
+.auth-links li{
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+.auth-links li a{
+    white-space:nowrap;
+}
+
+/* ===========================
+   REGISTER / LOGIN BUTTONS
+=========================== */
+
+.premium-auth-link{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:11px 22px;
+
+    border:1px solid rgba(212,175,55,.45);
+
+    border-radius:30px;
+
+    color:#F5E6B3 !important;
+
+    text-decoration:none;
+
+    transition:.3s;
+
+    font-weight:600;
+
+    white-space:nowrap;
+}
+
+.premium-auth-link:hover{
+    background:#D4AF37;
+
+    color:#112D20 !important;
+
+    text-decoration:none;
+}

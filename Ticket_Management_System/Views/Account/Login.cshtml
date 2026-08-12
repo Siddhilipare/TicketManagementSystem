@@ -1,0 +1,128 @@
+@using Ticket_Management_System.Models
+@model TicketModel.ViewModel.LoginViewModel
+@{
+    ViewBag.Title = "Sign In - Simplify";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Sign In - Simplify Ticket System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            var saved = localStorage.getItem('theme-preference');
+            var system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            var theme = saved || system || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body style="background: var(--bg-primary); margin: 0; padding: 0;">
+
+    <!-- PRE-LOGIN HEADER -->
+    <header class="landing-header">
+        <a href="@Url.Action("Index", "Home")" class="app-brand">
+            <span class="logo-badge-sm">S</span> Simplify
+        </a>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme" title="Toggle Dark/Light Theme">
+                <i class="fa-solid fa-sun sun-icon"></i>
+                <i class="fa-solid fa-moon moon-icon"></i>
+            </button>
+            <a href="@Url.Action("Login", "Account")" class="landing-btn-ghost">Login</a>
+            <a href="@Url.Action("Register", "Account")" class="landing-btn-solid">Register</a>
+        </div>
+    </header>
+
+    <div class="landing-split auth-page-enter">
+        <!-- Left Decorative Brand Panel -->
+        <div class="landing-panel-left">
+            <div style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 12px; margin-bottom: 8px;">
+                <span style="font-size: 28px; font-weight: 800; color: #FFFFFF;">S</span>
+            </div>
+
+            <div style="font-size: 28px; font-weight: 700; color: #FFFFFF;">Simplify</div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.75); margin-bottom: 24px;">Enterprise complaint &amp; ticket resolution</div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; text-align: left;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85);">
+                    <i class="fa-solid fa-check" style="color: #FFFFFF;"></i> Easy Complaint Tracking
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85);">
+                    <i class="fa-solid fa-check" style="color: #FFFFFF;"></i> Quick Issue Resolution
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.85);">
+                    <i class="fa-solid fa-check" style="color: #FFFFFF;"></i> Real-time team notifications
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="landing-panel-right">
+            <div class="auth-form-box">
+                <h2 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Welcome back</h2>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 24px;">Sign in to your account</div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div style="background: rgba(102, 187, 106, 0.15); border: 1px solid var(--success); color: var(--success); padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 20px;">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger small", style = "margin-bottom: 16px;" })
+
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label>Email Address</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "name@company.com", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label>Password</label>
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "••••••••", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 20px; margin-top: -8px;">
+                        <a href="@Url.Action("ForgotPassword", "Account")"
+                           style="font-size: 12px; color: var(--text-secondary); text-decoration: none;">
+                            Forgot your password?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="auth-btn-submit">
+                        Sign In
+                    </button>
+                }
+
+                <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); font-size: 13px; color: var(--text-secondary);">
+                    New to Simplify?
+                    <a href="@Url.Action("Register", "Account")" style="color: var(--accent-primary); font-weight: 600; text-decoration: none;">Create an account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE NAVIGATION OVERLAY -->
+    <div id="pageLoadingOverlay" class="loading-overlay">
+        <div class="spinner-ring"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/app-ui.js"></script>
+    <script src="~/Scripts/assistant-bot.js"></script>
+    <script src="~/Content/RequiredJs/Account/Login.js"></script>
+</body>
+</html>

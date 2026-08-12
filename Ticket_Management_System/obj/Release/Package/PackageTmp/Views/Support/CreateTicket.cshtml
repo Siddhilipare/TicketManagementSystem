@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "Raise Complaint";
+    ViewBag.ActiveTab = "SupportCreateTicket";
+}
+
+<div style="margin-bottom: 20px;">
+    <a href="@Url.Action("MyComplaints", "Support")" class="back-link-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to My Complaints
+    </a>
+</div>
+
+<div class="luxury-card" style="max-width: 700px; margin: 24px auto; padding: 40px;">
+    <div style="margin-bottom: 28px;">
+        <div class="accent-text">Support Executive Action</div>
+        <h2 class="luxury-heading" style="font-size: 26px; margin-top: 4px; margin-bottom: 0;">Raise a Complaint</h2>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" style="margin-bottom: 20px;">@TempData["ErrorMessage"]</div>
+    }
+
+    @using (Html.BeginForm("CreateTicket", "Support", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Complaint Title <span style="color:var(--error);">*</span> <span style="font-size:11px;color:var(--text-tertiary);">(3-100 characters)</span></label>
+            <input type="text" name="title" id="supportTicketTitle" class="form-control" placeholder="Brief title of the complaint"
+                   data-max-length="100" data-min-length="3" data-field-label="Complaint Title" required />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Description <span style="color:var(--error);">*</span> <span style="font-size:11px;color:var(--text-tertiary);">(10-2000 characters)</span></label>
+            <textarea name="description" id="supportTicketDesc" class="form-control" rows="5" placeholder="Describe the issue in detail..."
+                      data-max-length="2000" data-min-length="10" data-field-label="Description" required></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 32px;">
+            <label class="form-label">Attachments (Optional)</label>
+            <input type="file" name="Attachments" multiple class="form-control"
+                   accept=".jpg,.jpeg,.png,.gif,.bmp,.pdf,.txt,.doc,.docx"
+                   onchange="validateFiles(this)" />
+            <span id="fileError" style="color:red; font-size:13px; display:none;"></span>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+            <button type="submit" class="btn-primary-gold" style="flex: 1;">
+                <i class="fa-solid fa-plus"></i> Raise Complaint
+            </button>
+            <a href="@Url.Action("MyComplaints", "Support")" class="btn-secondary-gold">Cancel</a>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+    function validateFiles(input) {
+        var allowed = ['.jpg','.jpeg','.png','.gif','.bmp','.pdf','.txt','.doc','.docx'];
+        var maxSize = 5 * 1024 * 1024;
+        var maxFiles = 5;
+        var err = document.getElementById('fileError');
+        err.style.display = 'none';
+        err.innerText = '';
+
+        if (input.files.length > maxFiles) {
+            err.innerText = 'You can upload a maximum of 5 files at a time.';
+            err.style.display = 'block';
+            input.value = '';
+            return;
+        }
+        for (var i = 0; i < input.files.length; i++) {
+            var f = input.files[i];
+            var ext = f.name.substring(f.name.lastIndexOf('.')).toLowerCase();
+            if (allowed.indexOf(ext) === -1) {
+                err.innerText = "'" + f.name + "' has an invalid file type. Allowed: jpg, jpeg, png, gif, bmp, pdf, txt, doc, docx.";
+                err.style.display = 'block';
+                input.value = '';
+                return;
+            }
+            if (f.size > maxSize) {
+                err.innerText = "'" + f.name + "' exceeds the 5 MB size limit.";
+                err.style.display = 'block';
+                input.value = '';
+                return;
+            }
+        }
+    }
+    </script>
+}

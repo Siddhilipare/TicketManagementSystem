@@ -1,0 +1,60 @@
+﻿@model IEnumerable<TicketModel.Models.TicketModel>
+@{
+    ViewBag.Title = "Support Board";
+    ViewBag.ActiveTab = "SupportBoard";
+    var columns = new[] {
+        new { Id = 1, Name = "To Do" },
+        new { Id = 2, Name = "In Progress" },
+        new { Id = 4, Name = "Resolved" }
+    };
+}
+
+<div style="margin-bottom: 20px;">
+    <a href="@Url.Action("Index", "Support")" class="back-link-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div style="margin-bottom: 28px;">
+    <div class="accent-text">Kanban Workflow</div>
+    <h2 class="luxury-heading" style="font-size: 28px; margin-top: 4px; margin-bottom: 0;">Support Ticket Board</h2>
+</div>
+
+<div class="kanban-board-container" data-update-status-url="@Url.Action("UpdateStatusAjax", "Support")" style="display: flex; gap: 24px; overflow-x: auto; padding-bottom: 16px;">
+    @foreach (var col in columns)
+    {
+        var colTickets = Model.Where(t => t.StatusId == col.Id).ToList();
+        <div style="flex: 1; min-width: 300px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; box-shadow: var(--shadow-sm);"
+             data-status-id="@col.Id" ondragover="allowDrop(event)" ondrop="dropCard(event)">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                <h4 style="color: var(--accent-primary); margin: 0; font-size: 16px;">@col.Name</h4>
+                <span class="column-count-badge" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--accent-primary); border-radius: 12px; padding: 2px 10px; font-weight: 700; font-size: 12px;">@colTickets.Count</span>
+            </div>
+
+            <div class="column-cards-container" style="display: flex; flex-direction: column; gap: 14px; min-height: 120px;">
+                @foreach (var t in colTickets)
+                {
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-left: 3px solid var(--accent-primary); border-radius: 8px; padding: 16px; cursor: grab; transition: all 200ms ease; box-shadow: var(--shadow-sm);"
+                         draggable="true" ondragstart="dragStart(event)" data-ticket-id="@t.TicketId">
+
+                        <div style="font-weight: 700; color: var(--text-primary); font-size: 14px; margin-bottom: 6px;">@t.Title</div>
+                        <div style="font-family: monospace; font-size: 12px; color: var(--accent-primary); margin-bottom: 12px;">TICK-@t.TicketId.ToString("D4")</div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                            <span class="badge-pill-luxury @(t.PriorityName != null && t.PriorityName.ToLower() == "medium" ? "badge-priority-medium" : t.PriorityName != null && t.PriorityName.ToLower() == "high" ? "badge-priority-high" : t.PriorityName != null && t.PriorityName.ToLower() == "critical" ? "badge-priority-critical" : "badge-priority-low")">@(string.IsNullOrEmpty(t.PriorityName) ? "Normal" : t.PriorityName)</span>
+                            <button type="button" class="btn-secondary-gold" style="padding: 4px 10px; font-size: 11px;"
+                                    onclick="event.stopPropagation(); window.location.href='@Url.Action("Details", new { id = t.TicketId })'">
+                                <i class="fa-solid fa-comments"></i> Chat
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script src="~/Content/RequiredJs/Support/Board.js"></script>
+}
