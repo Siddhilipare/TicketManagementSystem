@@ -47,7 +47,7 @@ namespace Ticket_Management_System.Helpers
             }
             catch
             {
-                // Swallow silently
+                
             }
         }
     }

@@ -1,0 +1,67 @@
+﻿@model TicketModel.ViewModels.BulkImportResultViewModel
+@{
+    ViewBag.Title = "Bulk Import Results";
+    ViewBag.ActiveTab = "BulkImport";
+}
+
+<div style="margin-bottom: 28px;">
+    <div class="accent-text">Bulk Import</div>
+    <h2 class="luxury-heading" style="font-size: 28px; margin-top: 4px; margin-bottom: 0;">Import Results</h2>
+</div>
+
+<div class="stats-grid" style="margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--success);"><i class="fa-solid fa-circle-check"></i></div>
+        <div><div class="stat-number">@Model.SuccessCount</div><div class="stat-label">Created Successfully</div></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--error);"><i class="fa-solid fa-circle-xmark"></i></div>
+        <div><div class="stat-number">@Model.FailureCount</div><div class="stat-label">Failed</div></div>
+    </div>
+</div>
+
+<div class="luxury-table-wrapper">
+    <table class="luxury-table">
+        <thead>
+            <tr>
+                <th>Row</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.Results)
+            {
+                <tr>
+                    <td>@r.RowNumber</td>
+                    <td style="font-weight: 600;">@r.Title</td>
+                    <td>
+                        @if (r.Success)
+                        {
+                            <span style="color: var(--success); font-weight: 700; font-size: 12px;"><i class="fa-solid fa-circle-check"></i> Success</span>
+                        }
+                        else
+                        {
+                            <span style="color: var(--error); font-weight: 700; font-size: 12px;"><i class="fa-solid fa-circle-xmark"></i> Failed</span>
+                        }
+                    </td>
+                    <td style="font-size: 13px; color: var(--text-secondary);">
+                        @if (r.Success)
+                        {
+                            @("TICK-" + r.TicketId.Value.ToString("D4"))
+                        }
+                        else
+                        {
+                            @r.ErrorMessage
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<a href="@Url.Action("Index", "BulkImport")" class="btn-secondary-gold" style="margin-top: 20px; display: inline-flex;">
+    <i class="fa-solid fa-arrow-left"></i> Import More
+</a>

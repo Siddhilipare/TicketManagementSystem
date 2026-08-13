@@ -1,4 +1,4 @@
-@model TicketModel.ViewModel.RegisterViewModel
+﻿@model TicketModel.ViewModel.RegisterViewModel
 @{
     ViewBag.Title = "Register - Simplify";
     Layout = null;
@@ -87,7 +87,7 @@
 
                     <div style="display: flex; gap: 14px; margin-bottom: 16px;">
                         <div style="flex: 1;">
-                            <label>Password <span style="font-size:11px;color:var(--text-tertiary);">(8–100 characters)</span></label>
+                            <label>Password <span style="font-size:11px;color:var(--text-tertiary);"></span></label>
                             @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "••••••••", required = "required", id = "regPassword", data_max_length = "100", data_min_length = "8", data_field_label = "Password" })
                             @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
                         </div>

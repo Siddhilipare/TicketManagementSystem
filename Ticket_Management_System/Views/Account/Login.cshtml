@@ -1,4 +1,4 @@
-@using Ticket_Management_System.Models
+﻿@using Ticket_Management_System.Models
 @model TicketModel.ViewModel.LoginViewModel
 @{
     ViewBag.Title = "Sign In - Simplify";
@@ -79,6 +79,12 @@
                 @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm" }))
                 {
                     @Html.AntiForgeryToken()
+                    if (ViewBag.InactiveUserMessage != null)
+                    {
+                        <div class="small" style="color: #e6a817; font-weight: 600; margin-bottom: 16px; padding: 10px 12px; background: rgba(230, 168, 23, 0.1); border: 1px solid rgba(230, 168, 23, 0.3); border-radius: 6px;">
+                            <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i>@ViewBag.InactiveUserMessage
+                        </div>
+                    }
                     @Html.ValidationSummary(true, "", new { @class = "text-danger small", style = "margin-bottom: 16px;" })
 
                     <div class="form-group" style="margin-bottom: 18px;">

@@ -3,10 +3,7 @@ using TicketDAL.Dal;
 
 namespace Ticket_Management_System.Helpers
 {
-    /// <summary>
-    /// Branded, HTML formatted emails for the account flows (OTP verification,
-    /// password reset). Uses TicketDAL.Dal.EmailHelper as the SMTP transport.
-    /// </summary>
+   
     public static class AccountEmailService
     {
         public static void SendOtp(string toEmail, string otp, string purpose)

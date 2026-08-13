@@ -110,7 +110,7 @@ namespace Ticket_Management_System.Controllers
                 if (!ModelState.IsValid) return View(model);
 
                 UserModel user = userDAL.GetUserByEmail(model.Email);
-                if (user == null || !user.IsActive)
+                if (user == null)
                 {
                     ModelState.AddModelError("", "Invalid email or password.");
                     return View(model);
@@ -119,6 +119,12 @@ namespace Ticket_Management_System.Controllers
                 if (!PasswordHasher.VerifyPassword(model.Password, user.PasswordHash, user.PasswordSalt))
                 {
                     ModelState.AddModelError("", "Invalid email or password.");
+                    return View(model);
+                }
+
+                if (!user.IsActive)
+                {
+                    ViewBag.InactiveUserMessage = "You are currently an Inactive User. For more details, email support@simplify.com.";
                     return View(model);
                 }
 

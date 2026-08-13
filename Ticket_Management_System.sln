@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 14 for Web
 VisualStudioVersion = 14.0.23107.0
@@ -33,39 +31,3 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
-=======
-
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 14 for Web
-VisualStudioVersion = 14.0.23107.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ticket_Management_System", "Ticket_Management_System\Ticket_Management_System.csproj", "{C08BB20B-D1BB-4C08-BF95-85AEBE04D027}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketModel", "TicketModel\TicketModel.csproj", "{297B2475-63A3-4E69-8F72-CFD40511FF86}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketDAL", "TicketDAL\TicketDAL.csproj", "{C53E6AAE-896D-45F4-A446-06D6C3261E89}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C08BB20B-D1BB-4C08-BF95-85AEBE04D027}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C08BB20B-D1BB-4C08-BF95-85AEBE04D027}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C08BB20B-D1BB-4C08-BF95-85AEBE04D027}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C08BB20B-D1BB-4C08-BF95-85AEBE04D027}.Release|Any CPU.Build.0 = Release|Any CPU
-		{297B2475-63A3-4E69-8F72-CFD40511FF86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{297B2475-63A3-4E69-8F72-CFD40511FF86}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{297B2475-63A3-4E69-8F72-CFD40511FF86}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{297B2475-63A3-4E69-8F72-CFD40511FF86}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C53E6AAE-896D-45F4-A446-06D6C3261E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C53E6AAE-896D-45F4-A446-06D6C3261E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C53E6AAE-896D-45F4-A446-06D6C3261E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C53E6AAE-896D-45F4-A446-06D6C3261E89}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
->>>>>>> db4b6b5616062a18f8c8791de27d70861ea3b408

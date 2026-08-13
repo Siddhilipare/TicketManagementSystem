@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using TicketDAL.Dal;
 using TicketModel.ViewModels;
 using Ticket_Management_System.Helpers;
+using System.Text;
 
 namespace Ticket_Management_System.Controllers
 {
@@ -201,6 +202,71 @@ namespace Ticket_Management_System.Controllers
                 LogException(ex, "CompletedArchive");
                 return View(new List<TicketModel.Models.TicketModel>());
             }
+        }
+
+        public ActionResult ExportCompletedArchiveCsv(string search, DateTime? date, string sortOrder, int? priorityFilter)
+        {
+            try
+            {
+                int uid = GetCurrentUserId();
+                var tickets = supportDAL.GetCompletedArchive(uid);
+
+                if (!string.IsNullOrWhiteSpace(search))
+                    tickets = tickets.Where(t =>
+                        t.Title.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (t.RaisedByName != null && t.RaisedByName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        t.TicketId.ToString().Contains(search)
+                    ).ToList();
+
+                if (date.HasValue)
+                    tickets = tickets.Where(t =>
+                        t.TicketClosedDate.HasValue &&
+                        t.TicketClosedDate.Value.Date == date.Value.Date
+                    ).ToList();
+
+                if (priorityFilter.HasValue)
+                    tickets = tickets.Where(t => t.PriorityId == priorityFilter.Value).ToList();
+
+                tickets = sortOrder == "oldest"
+                    ? tickets.OrderBy(t => t.TicketClosedDate).ToList()
+                    : tickets.OrderByDescending(t => t.TicketClosedDate).ToList();
+
+                var sb = new StringBuilder();
+                sb.AppendLine(string.Join(",", new[]
+                {
+            "Ticket ID", "Title", "Priority", "Raised By", "Completed On"
+        }.Select(CsvEscape)));
+
+                foreach (var t in tickets)
+                {
+                    sb.AppendLine(string.Join(",", new[]
+                    {
+                "TICK-" + t.TicketId.ToString("D4"),
+                t.Title,
+                string.IsNullOrEmpty(t.PriorityName) ? "Normal" : t.PriorityName,
+                t.RaisedByName,
+                t.TicketClosedDate.HasValue ? t.TicketClosedDate.Value.ToString("yyyy-MM-dd HH:mm") : ""
+            }.Select(CsvEscape)));
+                }
+
+                byte[] bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+                string fileName = "CompletedArchive_" + DateTime.Now.ToString("yyyyMMdd_HHmm") + ".csv";
+                return File(bytes, "text/csv", fileName);
+            }
+            catch (Exception ex)
+            {
+                LogException(ex, "ExportCompletedArchiveCsv");
+                TempData["ErrorMessage"] = "An error occurred exporting the archive.";
+                return RedirectToAction("CompletedArchive");
+            }
+        }
+
+        private static string CsvEscape(string field)
+        {
+            if (string.IsNullOrEmpty(field)) return "";
+            bool needsQuoting = field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r");
+            string escaped = field.Replace("\"", "\"\"");
+            return needsQuoting ? "\"" + escaped + "\"" : escaped;
         }
 
         [HttpPost]

@@ -136,3 +136,57 @@ document.addEventListener('DOMContentLoaded', function () {
     var redirecting = loadAndRedirectCA();
     if (!redirecting) caRenderPage(caCurrentPage);
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    var exportBtn = document.getElementById('exportArchiveBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function () {
+            downloadCsv(exportBtn, exportBtn.dataset.exportUrl);
+        });
+    }
+});
+
+function downloadCsv(button, url) {
+    var label = button.querySelector('.export-btn-label');
+    var originalLabel = label.textContent;
+    var originalIcon = button.querySelector('i').className;
+
+    button.disabled = true;
+    button.querySelector('i').className = 'fa-solid fa-spinner fa-spin';
+    label.textContent = 'Downloading...';
+
+    fetch(url, { credentials: 'same-origin' })
+        .then(function (response) {
+            if (!response.ok) throw new Error('Export failed');
+            var disposition = response.headers.get('Content-Disposition') || '';
+            var match = disposition.match(/filename="?([^"]+)"?/);
+            var fileName = match ? match[1] : 'export.csv';
+            return response.blob().then(function (blob) {
+                return { blob: blob, fileName: fileName };
+            });
+        })
+        .then(function (result) {
+            var blobUrl = window.URL.createObjectURL(result.blob);
+            var tempLink = document.createElement('a');
+            tempLink.href = blobUrl;
+            tempLink.download = result.fileName;
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+            window.URL.revokeObjectURL(blobUrl);
+
+            if (window.LuxuryUI && window.LuxuryUI.showToast) {
+                window.LuxuryUI.showToast('success', 'Download Complete', result.fileName + ' has been downloaded.');
+            }
+        })
+        .catch(function () {
+            if (window.LuxuryUI && window.LuxuryUI.showToast) {
+                window.LuxuryUI.showToast('error', 'Export Failed', 'Could not download the file. Please try again.');
+            }
+        })
+        .finally(function () {
+            button.disabled = false;
+            button.querySelector('i').className = originalIcon;
+            label.textContent = originalLabel;
+        });
+}

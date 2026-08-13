@@ -45,7 +45,7 @@ namespace TicketDAL.Dal
             }
             catch
             {
-                // Swallow silently
+               
             }
         }
     }

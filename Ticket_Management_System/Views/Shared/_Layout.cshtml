@@ -218,6 +218,9 @@
                             <a href="@Url.Action("Create", "Ticket")" class="sidebar-link @(ViewBag.ActiveTab == "Create" ? "active" : "")">
                                 <i class="fa-solid fa-circle-plus"></i> <span>Raise Complaint</span>
                             </a>
+                            <a href="@Url.Action("Index", "BulkImport")" class="sidebar-link @(ViewBag.ActiveTab == "BulkImport" ? "active" : "")">
+                                <i class="fa-solid fa-file-import"></i> <span>Bulk Add</span>
+                            </a>
                         </nav>
                     }
                     else if (userRole == "Support Executive")
@@ -235,6 +238,9 @@
                             </a>
                             <a href="@Url.Action("CreateTicket", "Support")" class="sidebar-link @(ViewBag.ActiveTab == "SupportCreateTicket" ? "active" : "")">
                                 <i class="fa-solid fa-circle-plus"></i> <span>Raise Complaint</span>
+                            </a>
+                            <a href="@Url.Action("Index", "BulkImport")" class="sidebar-link @(ViewBag.ActiveTab == "BulkImport" ? "active" : "")">
+                                <i class="fa-solid fa-file-import"></i> <span>Bulk Add</span>
                             </a>
                         </nav>
                     }
@@ -259,6 +265,9 @@
                             </a>
                             <a href="@Url.Action("CreateTicket", "Admin")" class="sidebar-link @(ViewBag.ActiveTab == "AdminCreateTicket" ? "active" : "")">
                                 <i class="fa-solid fa-circle-plus"></i> <span>Raise Complaint</span>
+                            </a>
+                            <a href="@Url.Action("Index", "BulkImport")" class="sidebar-link @(ViewBag.ActiveTab == "BulkImport" ? "active" : "")">
+                                <i class="fa-solid fa-file-import"></i> <span>Bulk Add</span>
                             </a>
                         </nav>
                     }

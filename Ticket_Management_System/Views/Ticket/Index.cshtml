@@ -20,14 +20,14 @@
     @using (Html.BeginForm("Index", "Ticket", FormMethod.Get, new { id = "ticketFilterForm", data_search = (ViewBag.Search ?? "").ToString(), data_date = (ViewBag.SelectedDate ?? "").ToString(), data_sort_order = (ViewBag.SortOrder ?? "newest").ToString(), data_status_filter = (ViewBag.StatusFilter != null ? ViewBag.StatusFilter.ToString() : ""), style = "display: flex; gap: 14px; align-items: center; flex-wrap: wrap;" }))
     {
         <div style="flex-grow: 1; min-width: 240px; position: relative;">
-            <input type="text" name="search" id="searchInput" value="@ViewBag.Search" placeholder="Search by title, description or ID..." class="form-control" />
+            <input type="text" name="search" id="searchInput" value="@ViewBag.Search" placeholder="Search by title, description..." class="form-control" />
         </div>
 
         <div class="dropdown" style="position: relative;">
             <button type="button" class="btn-secondary-gold dropdown-toggle" data-toggle="dropdown" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;" title="Filter Options">
                 <i class="fa-solid fa-filter" style="font-size: 16px; color: var(--accent-primary);"></i>
                 <span>Filter</span>
-                <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>
+                <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>  
             </button>
 
             <div class="dropdown-menu dropdown-menu-right funnel-filter-panel" onclick="event.stopPropagation();">

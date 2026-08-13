@@ -45,7 +45,7 @@ namespace TicketModel.Models
         public DateTime? ModifiedDate { get; set; }
     }
 
-    // ── ChatHistory Model ──────────────────────────────────────────────────
+    // ── ChatHistory Model ──────────────────────────────────────────────────  
     public class ChatHistory
     {
         [Key]

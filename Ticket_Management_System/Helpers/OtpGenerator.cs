@@ -4,10 +4,7 @@ using System.Text;
 
 namespace Ticket_Management_System.Helpers
 {
-    /// <summary>
-    /// Cryptographically secure OTP generation and one-way hashing.
-    /// Only the hash is persisted in the database; the plain value is emailed.
-    /// </summary>
+   
     public static class OtpGenerator
     {
         public static string Generate(int length = 6)
