@@ -141,11 +141,26 @@ namespace Ticket_Management_System.Controllers
                     return Json(new { success = false, message = "Invalid ticket or status value." });
 
                 int uid = GetCurrentUserId();
+
+                var ticket = supportDAL.GetTicketByIdForSupport(ticketId, uid);
+                if (ticket == null)
+                    return Json(new { success = false, message = "Ticket not found or not assigned to you." });
+              
+                var validTransitions = new HashSet<Tuple<int, int>>
+        {
+            Tuple.Create(1, 2), Tuple.Create(2, 1),   // To Do <-> In Progress
+            Tuple.Create(2, 4), Tuple.Create(4, 2)    // In Progress <-> Completed
+        };
+
+                if (!validTransitions.Contains(Tuple.Create(ticket.StatusId, statusId)))
+                {
+                    return Json(new { success = false, message = "That status change isn't allowed." });
+                }
+
                 bool success = supportDAL.UpdateStatusOnly(ticketId, uid, statusId);
 
                 if (success && statusId == 4)
                 {
-                    var ticket = supportDAL.GetTicketByIdForSupport(ticketId, uid);
                     var notifyDAL = new NotificationDataAccess();
                     notifyDAL.Insert(ticket.RaisedbyUserId,
                         "Your issue \"" + ticket.Title + "\" has been resolved. Please review.", ticketId);
@@ -408,40 +423,25 @@ namespace Ticket_Management_System.Controllers
             {
                 ViewBag.ActiveTab = "SupportCreateTicket";
 
-                if (string.IsNullOrWhiteSpace(title) || title.Trim().Length < 3 || title.Trim().Length > 100)
+                string titleError = TicketValidationHelper.ValidateTitle(title);
+                if (titleError != null)
                 {
-                    TempData["ErrorMessage"] = "Title must be between 3 and 100 characters.";
-                    return View();
-                }
-                if (string.IsNullOrWhiteSpace(description) || description.Trim().Length < 10 || description.Trim().Length > 2000)
-                {
-                    TempData["ErrorMessage"] = "Description must be between 10 and 2000 characters.";
+                    TempData["ErrorMessage"] = titleError;
                     return View();
                 }
 
-                if (Attachments != null)
+                string descriptionError = TicketValidationHelper.ValidateDescription(description);
+                if (descriptionError != null)
                 {
-                    var actualFiles = Attachments.Where(f => f != null && f.ContentLength > 0).ToList();
-                    if (actualFiles.Count > 5)
-                    {
-                        TempData["ErrorMessage"] = "You can upload a maximum of 5 files at a time.";
-                        return View();
-                    }
-                    string[] allowedTypes = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".txt", ".doc", ".docx" };
-                    foreach (var file in actualFiles)
-                    {
-                        string ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-                        if (Array.IndexOf(allowedTypes, ext) < 0)
-                        {
-                            TempData["ErrorMessage"] = "'" + file.FileName + "' has an invalid file type. Allowed: jpg, jpeg, png, gif, bmp, pdf, txt, doc, docx.";
-                            return View();
-                        }
-                        if (file.ContentLength > 5 * 1024 * 1024)
-                        {
-                            TempData["ErrorMessage"] = "'" + file.FileName + "' exceeds the 5 MB size limit.";
-                            return View();
-                        }
-                    }
+                    TempData["ErrorMessage"] = descriptionError;
+                    return View();
+                }
+
+                string attachmentError = TicketValidationHelper.ValidateAttachments(Attachments);
+                if (attachmentError != null)
+                {
+                    TempData["ErrorMessage"] = attachmentError;
+                    return View();
                 }
 
                 int uid = GetCurrentUserId();

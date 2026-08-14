@@ -116,42 +116,46 @@ namespace Ticket_Management_System.Controllers
 
                     try
                     {
-                        // ── Same validation rules as the existing single-ticket create flows ──
-                        if (string.IsNullOrWhiteSpace(row.Title) || row.Title.Trim().Length < 3 || row.Title.Trim().Length > 100)
+                        string titleError = TicketValidationHelper.ValidateTitle(row.Title);
+                        if (titleError != null)
                         {
-                            rowResult.ErrorMessage = "Title must be between 3 and 100 characters.";
-                            result.Results.Add(rowResult);
-                            continue;
-                        }
-                        if (string.IsNullOrWhiteSpace(row.Description) || row.Description.Trim().Length < 10 || row.Description.Trim().Length > 2000)
-                        {
-                            rowResult.ErrorMessage = "Description must be between 10 and 2000 characters.";
+                            rowResult.ErrorMessage = titleError;
                             result.Results.Add(rowResult);
                             continue;
                         }
 
-                        // ── Create the ticket — SQL Server's IDENTITY column handles the next ID
-                        // automatically and safely (no manual max+1 needed, and no race condition
-                        // even if two people import at the same moment). New tickets always start
-                        // unassigned (AssignedtoUserId stays NULL), so they land directly in the
-                        // Admin's "Unassigned Tickets" queue — same as any single-created ticket.
+                        string descriptionError = TicketValidationHelper.ValidateDescription(row.Description);
+                        if (descriptionError != null)
+                        {
+                            rowResult.ErrorMessage = descriptionError;
+                            result.Results.Add(rowResult);
+                            continue;
+                        }
+
                         int newTicketId = isAdmin
-                            ? adminDAL.CreateTicket(row.Title.Trim(), row.Description.Trim(), uid, uid)
-                            : ticketDAL.CreateTicket(row.Title.Trim(), row.Description.Trim(), uid);
-
-                        // ── Notifications, matching each role's existing single-create behavior ──
-                        if (isAdmin)
-                        {
-                            notifyDAL.Insert(uid, "You raised a new complaint: \"" + row.Title.Trim() + "\"", newTicketId);
-                        }
-                        else
-                        {
-                            foreach (var adminId in adminIdsToNotify)
-                                notifyDAL.Insert(adminId, "New complaint raised: \"" + row.Title.Trim() + "\"", newTicketId);
-                        }
-
+                             ? adminDAL.CreateTicket(row.Title.Trim(), row.Description.Trim(), uid, uid)
+                             : ticketDAL.CreateTicket(row.Title.Trim(), row.Description.Trim(), uid);
+                  
                         rowResult.Success = true;
                         rowResult.TicketId = newTicketId;
+
+                        try
+                        {
+                            if (isAdmin)
+                            {
+                                notifyDAL.Insert(uid, "You raised a new complaint: \"" + row.Title.Trim() + "\"", newTicketId);
+                            }
+                            else
+                            {
+                                foreach (var adminId in adminIdsToNotify)
+                                    notifyDAL.Insert(adminId, "New complaint raised: \"" + row.Title.Trim() + "\"", newTicketId);
+                            }
+                        }
+                        catch (Exception notifyEx)
+                        {
+                            Helpers.Logger.LogToFile(notifyEx, "BulkImport", "ProcessRow_Notify");
+                        }
+
                         result.Results.Add(rowResult);
                     }
                     catch (Exception rowEx)

@@ -10,6 +10,7 @@ using Ticket_Management_System.Helpers;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Text;
+using System.Transactions;
 
 namespace Ticket_Management_System.Controllers
 {
@@ -396,29 +397,47 @@ namespace Ticket_Management_System.Controllers
                 int adminId = GetCurrentUserId();
                 var successParts = new List<string>();
 
-                // ── Part 1: Assign / Reassign (only if the selection actually changed) ──
                 bool isNewAssignment = !ticket.AssignedtoUserId.HasValue;
                 bool isReassignment = ticket.AssignedtoUserId.HasValue && ticket.AssignedtoUserId.Value != assignedToUserId;
+                int? previousAssigneeId = ticket.AssignedtoUserId;
 
-                if (isNewAssignment || isReassignment)
+                // ── All DB writes for this request happen inside one transaction
+                using (var scope = new TransactionScope())
                 {
-                    int? previousAssigneeId = ticket.AssignedtoUserId;
-                    adminDAL.AssignTicket(ticketId, assignedToUserId, adminId);
-
                     var notifyDAL = new NotificationDataAccess();
-                    notifyDAL.Insert(assignedToUserId, "You have been assigned complaint: \"" + ticket.Title + "\"", ticketId);
 
-                    string employeeMsg = isReassignment
-                        ? "Your complaint \"" + ticket.Title + "\" has been reassigned to a new support executive."
-                        : "Your complaint \"" + ticket.Title + "\" has been assigned to a support executive.";
-                    notifyDAL.Insert(ticket.RaisedbyUserId, employeeMsg, ticketId);
-
-                    if (isReassignment && previousAssigneeId.HasValue)
+                    if (isNewAssignment || isReassignment)
                     {
-                        notifyDAL.Insert(previousAssigneeId.Value, "Complaint \"" + ticket.Title + "\" has been reassigned to another support executive.", ticketId);
+                        adminDAL.AssignTicket(ticketId, assignedToUserId, adminId);
+
+                        notifyDAL.Insert(assignedToUserId, "You have been assigned complaint: \"" + ticket.Title + "\"", ticketId);
+
+                        string employeeMsg = isReassignment
+                            ? "Your complaint \"" + ticket.Title + "\" has been reassigned to a new support executive."
+                            : "Your complaint \"" + ticket.Title + "\" has been assigned to a support executive.";
+                        notifyDAL.Insert(ticket.RaisedbyUserId, employeeMsg, ticketId);
+
+                        if (isReassignment && previousAssigneeId.HasValue)
+                        {
+                            notifyDAL.Insert(previousAssigneeId.Value, "Complaint \"" + ticket.Title + "\" has been reassigned to another support executive.", ticketId);
+                        }
+
+                        successParts.Add("Ticket assigned successfully.");
                     }
 
-                    // Email the newly assigned support executive
+                    if (!string.IsNullOrWhiteSpace(commentText))
+                    {
+                        new TicketDataAccess().AddComment(ticketId, adminId, commentText.Trim());
+                        successParts.Add("Comment sent successfully.");
+                    }
+
+                    scope.Complete(); // only commits if nothing above threw
+                }
+
+                // Email stays OUTSIDE the transaction on purpose — it's not a database
+               
+                if (isNewAssignment || isReassignment)
+                {
                     try
                     {
                         var assignedUser = new UserDAL().GetUserById(assignedToUserId);
@@ -435,19 +454,10 @@ namespace Ticket_Management_System.Controllers
                     {
                         LogException(emailEx, "ManageTicket_SendAssignmentEmail");
                     }
-
-                    successParts.Add("Ticket assigned successfully.");
-                }
-
-                // ── Part 2: Comment (fully optional) ──
-                if (!string.IsNullOrWhiteSpace(commentText))
-                {
-                    new TicketDataAccess().AddComment(ticketId, adminId, commentText.Trim());
-                    successParts.Add("Comment sent successfully.");
                 }
 
                 TempData["SuccessMessage"] = successParts.Count > 0
-                    ? string.Join(" ", successParts)
+                            ? string.Join(" ", successParts)
                     : "No changes were made.";
 
                 return RedirectToAction("AllTickets");
@@ -525,41 +535,25 @@ namespace Ticket_Management_System.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(title) || title.Trim().Length < 3 || title.Trim().Length > 100)
+                string titleError = TicketValidationHelper.ValidateTitle(title);
+                if (titleError != null)
                 {
-                    TempData["ErrorMessage"] = "Title must be between 3 and 100 characters.";
-                    return View();
-                }
-                if (string.IsNullOrWhiteSpace(description) || description.Trim().Length < 10 || description.Trim().Length > 2000)
-                {
-                    TempData["ErrorMessage"] = "Description must be between 10 and 2000 characters.";
+                    TempData["ErrorMessage"] = titleError;
                     return View();
                 }
 
-                // Validate attachments
-                if (Attachments != null)
+                string descriptionError = TicketValidationHelper.ValidateDescription(description);
+                if (descriptionError != null)
                 {
-                    var actualFiles = Attachments.Where(f => f != null && f.ContentLength > 0).ToList();
-                    if (actualFiles.Count > 5)
-                    {
-                        TempData["ErrorMessage"] = "You can upload a maximum of 5 files at a time.";
-                        return View();
-                    }
-                    foreach (var file in actualFiles)
-                    {
-                        string ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
-                        string[] allowed = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".txt", ".doc", ".docx" };
-                        if (Array.IndexOf(allowed, ext) < 0)
-                        {
-                            TempData["ErrorMessage"] = "'" + file.FileName + "' has an invalid file type. Allowed: jpg, jpeg, png, gif, bmp, pdf, txt, doc, docx.";
-                            return View();
-                        }
-                        if (file.ContentLength > 5 * 1024 * 1024)
-                        {
-                            TempData["ErrorMessage"] = "'" + file.FileName + "' exceeds the 5 MB size limit.";
-                            return View();
-                        }
-                    }
+                    TempData["ErrorMessage"] = descriptionError;
+                    return View();
+                }
+
+                string attachmentError = TicketValidationHelper.ValidateAttachments(Attachments);
+                if (attachmentError != null)
+                {
+                    TempData["ErrorMessage"] = attachmentError;
+                    return View();
                 }
 
                 int adminId = GetCurrentUserId();
